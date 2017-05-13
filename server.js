@@ -21,7 +21,7 @@ app.set("view engine","handlebars");
 apiRoutes.route(app);
 app.use("/",routes)
 //apiCall.analyze;
-
+apiRoutes.route(app);
 db.sequelize.sync({force:true}).then(function(){
 	app.listen(PORT,function(){
 		console.log("listening on PORT: " + PORT)
