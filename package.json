@@ -9,9 +9,11 @@
     "express-handlebars": "^3.0.0",
     "method-override": "^2.3.8",
     "mysql": "^2.13.0",
+    "request-promise": "^4.2.1",
     "sentiment": "^4.0.0",
     "sequelize": "^3.30.4",
-    "twitter": "^1.7.0"
+    "twitter": "^1.7.0",
+    "unirest": "^0.5.1"
   },
   "devDependencies": {},
   "scripts": {
