@@ -1,5 +1,5 @@
 var Sequelize = require('sequelize')
-var db = new Sequelize('stocks', 'robzter', 'Roberto1', {
+var db = new Sequelize('stocks', 'my_username', 'my_password', {
 	dialect: 'mysql'
 })
 
