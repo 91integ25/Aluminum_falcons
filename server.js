@@ -4,7 +4,7 @@ var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
 var PORT = process.env.PORT || 8080;
 var exphbs = require("express-handlebars");
-var apiRoutes= require("./routes/apiRoutes");
+var apiRoutes = require("./routes/apiRoutes");
 var routes = require("./routes/htmlRoutes");
 
 
@@ -17,14 +17,13 @@ app.use(methodOverride("_method"));
 
 app.engine("handlebars",exphbs({defaultLayout:"main"}));
 app.set("view engine","handlebars");
-
+apiRoutes.route(app);
 app.use("/",routes)
 //apiCall.analyze;
+
 
 app.listen(PORT,function(){
 	console.log("listening on PORT: " + PORT)
 });
 
-apiRoutes.awsApi(function(data){
-	console.log("this is awsApi: ",data);
-})
+
