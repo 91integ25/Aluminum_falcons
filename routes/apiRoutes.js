@@ -41,7 +41,7 @@ var apiCall  = {
 			}
 						cb(apiResults)
 
-		})
+		});
 
 
 	}
