@@ -1,5 +1,5 @@
 var Sequelize = require('sequelize')
-var db = new Sequelize('users', 'my_username', 'my_password', {
+var db = new Sequelize('stocks', 'robzter', 'Roberto1', {
 	dialect: 'mysql'
 })
 
@@ -12,19 +12,20 @@ var Post = db.define('post', {
 	 userName: {
 	 	type: Sequelize.STRING
 	 },
-	 email: {
+	 ticker: {
 	 	type: Sequelize.STRING
 	 }, 
-	 password: {
-	 	type: Sequelize.STRING
+	 purchase: {
+	 	type: Sequelize.BOOLEAN,
+	 	defaultValue: false
 	 }
 })
 
 Post.sync().then(function() {
 	var data = {
 		userName: 'This test',
-		email: 'email@gmail.com',
-		password: 'HeyYo'
+		ticker: 'QQQ',
+		purchase: true
 	}
 
 Post.create(data).then(function(post) {

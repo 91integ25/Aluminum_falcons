@@ -9,3 +9,6 @@ CREATE TABLE users (
 );
 
 USE users;
+
+SELECT *
+FROM users;
