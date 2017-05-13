@@ -4,6 +4,7 @@ var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
 var PORT = process.env.PORT || 8080;
 var exphbs = require("express-handlebars");
+var apiCall = require("./routes/apiRoutes")
 
 
 
@@ -20,7 +21,12 @@ app.get("/",function(req,res){
 	res.render("index");
 })
 
+//apiCall.analyze;
 
 app.listen(PORT,function(){
 	console.log("listening on PORT: " + PORT)
 });
+
+apiCall.awsApi(function(data){
+	console.log("this is result: ",data);
+})
