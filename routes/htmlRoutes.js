@@ -8,6 +8,7 @@ var user = {
 
 router.get("/",function(req,res){
 	res.render("index",user);
-})
+});
+
 
 module.exports = router;
