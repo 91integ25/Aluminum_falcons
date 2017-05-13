@@ -1,17 +1,18 @@
- var keys = require('../keys');
-  var Twitter = require('twitter');
-
- var client = new Twitter({
+var keys = require('../keys');
+var Twitter = require('twitter');
+var unirest = require("unirest");
+var express = require('express');
+var express = require('express');
+var router = express.Router();
+var client = new Twitter({
 	consumer_key: keys.consumer_key,
 	consumer_secret: keys.consumer_secret,
 	access_token_key: keys.access_token,
 	access_token_secret: keys.access_secret
 });
 
-var unirest = require("unirest");
 
-
-var apiCall  = {
+module.exports = {
 	tweetsData: function(cb){
 		var tweetsArr = [];
 		var stream =  client.stream('statuses/filter', {track: 'london'});
@@ -39,13 +40,9 @@ var apiCall  = {
 
 				});
 			}
-						cb(apiResults)
-
+			cb(apiResults)
 		});
-
-
 	}
 
 
 }
-module.exports = apiCall;
