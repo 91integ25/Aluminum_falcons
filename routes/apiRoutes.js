@@ -39,8 +39,7 @@ module.exports = {
 			});
 		
 	},
-	route:function(app){
-	
+	route: function(app){
 		app.post("/api/create_stock",function(req,res){
 			console.log(req.body)
 			this.awsApi(function(data){

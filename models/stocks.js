@@ -1,11 +1,26 @@
 module.exports = function(sequelize,DataTypes){
-	var stock = sequelize.define('stock', {
+	var Stock = sequelize.define('Stock', {
 	 stockName:{
-	 	type: DataTypes.NUMBER
+	 	type: DataTypes.INTEGER,
+	 	allowNull:false,
+	 	validate:{
+	 		len:[1]
+	 	}
 	 },
 	 ticker: {
 	 	type: DataTypes.STRING
 	 }
-});
-	return stock;
+	},{
+	 	classMethods:{
+	 		associate:function(models){
+	 			Stock.belongsTo(models.User,{
+	 				onDelete:"CASCADE",
+	 				foreignKey:{
+	 					allowNull:false
+	 				}
+	 			})
+	 		}
+	 	}
+	});
+	return Stock;
 }
