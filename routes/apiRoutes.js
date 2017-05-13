@@ -9,21 +9,20 @@ var client = new Twitter({
 	access_token_key: keys.access_token,
 	access_token_secret: keys.access_secret
 });
-module.exports = {
-	tweetsData: function(company,cb){
+function tweetsData(company,cb){
 		var stream =  client.stream('statuses/filter', {track: company});
 		var arr = [];
 		stream.on('data', function(event) {
 			arr.push(event.text);
-			if(arr.length <= 2){
+			if(arr.length === 2){
 				console.log("this is tweets: ",arr);
 				cb(arr);
 			}
 		});
-	},
-	awsApi:function(cb,company){
+	}
+	function awsApi(cb,company){
 		var apiResults = []
-			this.tweetsData(company,function(data){
+			tweetsData(company,function(data){
 				for(var i = 0 ; i <= data.length; i++){
 					unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
 					.header("X-Mashape-Key", "BOEwktCNBDmshSUeLunnuyGLz48wp1yHuyljsnNDWN4oLTDPPG")
@@ -35,15 +34,15 @@ module.exports = {
 
 					});
 				}
+				console.log(apiResults)
 				cb(apiResults)
 			});
-		
-	},
-	route:function(app){
-	
+	}
+module.exports = {
+	route: function(app){
 		app.post("/api/create_stock",function(req,res){
-			console.log(req.body)
-			this.awsApi(function(data){
+			awsApi(function(data){
+				console.log(data);
 				res.json({company: req.body.company,sentiment:data});
 			},req.body.company)
 		})

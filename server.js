@@ -3,6 +3,7 @@ var app = express();
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
 var PORT = process.env.PORT || 8080;
+var db = require("./models");
 var exphbs = require("express-handlebars");
 var apiRoutes = require("./routes/apiRoutes");
 var routes = require("./routes/htmlRoutes");
@@ -20,10 +21,12 @@ app.set("view engine","handlebars");
 apiRoutes.route(app);
 app.use("/",routes)
 //apiCall.analyze;
-
-
-app.listen(PORT,function(){
-	console.log("listening on PORT: " + PORT)
+apiRoutes.route(app);
+db.sequelize.sync({force:true}).then(function(){
+	app.listen(PORT,function(){
+		console.log("listening on PORT: " + PORT)
+	});
 });
+
 
 
