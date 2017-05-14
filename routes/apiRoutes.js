@@ -2,6 +2,8 @@ var keys = require('../keys');
 var Twitter = require('twitter');
 var unirest = require("unirest");
 var express = require('express');
+var db = require("../models");
+var bcrypt = require('bcrypt');
 var router = express.Router();
 var client = new Twitter({
 	consumer_key: keys.consumer_key,
@@ -60,3 +62,26 @@ module.exports = {
 
 
 }
+var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
+
+router.get("/test", function(req, res) {
+  res.status(200).json({ 'message': 'Success'})
+});
+
+
+
+// POST route for creating a new user
+router.post("/user", function(req, res) {
+  bcrypt.hash(req.body.password, salt, function(err, hash) {
+    // Store hash in your password DB.
+    // TODO: update schema to enforce unique usernames
+    db.User.create({
+      username: req.body.username,
+      password: hash
+    })
+      .then(function(dbPost) {
+        res.status(200).json({'status': 'success'});
+      });
+  });
+
+});
