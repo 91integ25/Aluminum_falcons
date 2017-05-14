@@ -3,6 +3,7 @@ var Twitter = require('twitter');
 var unirest = require("unirest");
 var express = require('express');
 var router = express.Router();
+var db = require("../models");
 var client = new Twitter({
 	consumer_key: keys.consumer_key,
 	consumer_secret: keys.consumer_secret,
@@ -15,7 +16,7 @@ function tweetsData(company,cb){
 		var arr = [];
 		stream.on('data', function(event) {
 			arr.push(event.text);
-			if(arr.length === 2){
+			if(arr.length === 20){
 				cb(arr);
 			}
 		});
@@ -31,7 +32,6 @@ function tweetsData(company,cb){
 					.header("Accept", "application/json")
 					.send("text="+tweetArr[i])
 					.end(function (result) {
-						console.log("result in awsApi",result);
 						apiResults.push(result.body);
 						
 						if(apiResults.length === i){
@@ -43,19 +43,38 @@ function tweetsData(company,cb){
 				}
 			});
 	}
+
 module.exports = {
 	route: function(app){
 		app.post("/api/create_stock",function(req,res){
 			awsApi(function(data){
-				console.log("this worked",data);
-				var dataNum = data.reduce(function(a,b){
-					return a.score + b.score;
-				});
+				console.log("data arr: ",data);
+				//console.log("this worked",data);
+				var dataNum = data.map(function(e){
+					return Number(e.score);
+				})
+				var dataReduced = dataNum.reduce(function(a,b){
+					return a + b;
+				})
+				console.log(dataReduced/data.length);
 				
 				//console.log(req.body)
 				//res.json({company: req.body.company,sentiment:data});
 			},req.body.company)
-		})
+		});
+		app.post("/sign-up",function(req,res){
+			console.log(req.body)
+			db.User.create(req.body).then(function(){
+				res.json(req.body);
+			});
+		});
+		app.get("/log-in",function(req,res){
+			db.User.findOne({where:{
+				userName:req.body.userName
+			}}).then(function(result){
+				res.render("website",result);
+			})
+		});
 	}
 
 
