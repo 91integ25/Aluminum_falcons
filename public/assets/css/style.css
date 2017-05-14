@@ -123,7 +123,7 @@ a:focus {
   }
   #login-dp{
     background-color: inherit;
-    color: #0000FF;
+    color: #FFF;
   }
   #login-dp .bottom{
       background-color: inherit;
@@ -324,7 +324,7 @@ body {
     min-width: 250px;
     padding: 14px 14px 0;
     overflow:hidden;
-    background-color:rgba(255,255,255,.8);
+    background-color:#ddd;
 }
 #login-dp .help-block{
     font-size:12px
