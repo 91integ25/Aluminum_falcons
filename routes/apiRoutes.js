@@ -10,40 +10,50 @@ var client = new Twitter({
 	access_token_secret: keys.access_secret
 });
 function tweetsData(company,cb){
+	console.log(company)
 		var stream =  client.stream('statuses/filter', {track: company});
 		var arr = [];
 		stream.on('data', function(event) {
 			arr.push(event.text);
 			if(arr.length === 2){
-				console.log("this is tweets: ",arr);
 				cb(arr);
 			}
 		});
 	}
 	function awsApi(cb,company){
 		var apiResults = []
-			tweetsData(company,function(data){
-				for(var i = 0 ; i <= data.length; i++){
+			tweetsData(company,function(tweetArr){
+				
+				for(var i = 0 ; i < tweetArr.length; i++){
 					unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
 					.header("X-Mashape-Key", "BOEwktCNBDmshSUeLunnuyGLz48wp1yHuyljsnNDWN4oLTDPPG")
 					.header("Content-Type", "application/x-www-form-urlencoded")
 					.header("Accept", "application/json")
-					.send("text="+data[i])
+					.send("text="+tweetArr[i])
 					.end(function (result) {
-					  apiResults.push(result.body);
+						console.log("result in awsApi",result);
+						apiResults.push(result.body);
+						
+						if(apiResults.length === i){
+							cb(apiResults);
+						}
 
 					});
+					
 				}
-				console.log(apiResults)
-				cb(apiResults)
 			});
 	}
 module.exports = {
 	route: function(app){
 		app.post("/api/create_stock",function(req,res){
 			awsApi(function(data){
-				console.log(data);
-				res.json({company: req.body.company,sentiment:data});
+				console.log("this worked",data);
+				var dataNum = data.reduce(function(a,b){
+					return a.score + b.score;
+				});
+				
+				//console.log(req.body)
+				//res.json({company: req.body.company,sentiment:data});
 			},req.body.company)
 		})
 	}
