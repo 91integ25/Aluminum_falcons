@@ -8,7 +8,8 @@ var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
 var db = require("../models");
 var jwt = require('jsonwebtoken');
 var stream;
-
+var tweetCount;
+var tweetTotalSentiment;
 
 var client = new Twitter({
     consumer_key: keys.consumer_key,
@@ -33,12 +34,12 @@ function tweetsData(company, cb) {
         }
     });
 }
-function beginMonitoring(phrase,cb) {
+function beginMonitoring(company,cb) {
     // cleanup if we're re-setting the monitoring
-    if (monitoringPhrase) {
+    if (monitoringCompany) {
         resetMonitoring();
     }
-    monitoringPhrase = phrase;
+    monitoringCompany = company;
     tweetCount = 0;
     tweetTotalSentiment = 0;
     tweeter.verifyCredentials(function (error, data) {
@@ -50,12 +51,12 @@ function beginMonitoring(phrase,cb) {
             }
         } else {
             tweeter.stream('statuses/filter', {
-                'track': monitoringPhrase
+                'track': monitoringCompany
             }, function (inStream) {
             	// remember the stream so we can destroy it when we create a new one.
             	// if we leak streams, we end up hitting the Twitter API limit.
             	stream = inStream;
-                console.log("Monitoring Twitter for " + monitoringPhrase);
+                console.log("Monitoring Twitter for " + monitoringCompany);
                 stream.on('data', function (data) {
                     // only evaluate the sentiment of English-language tweets
                     if (data.lang === 'en') {
@@ -93,7 +94,7 @@ function beginMonitoring(phrase,cb) {
 
 function awsApi(cb, company) {
     var apiResults = []
-    tweetsData(company, function(tweetArr) {
+    beginMonitoring(company, function(tweetArr) {
 
         for (var i = 0; i < tweetArr.length; i++) {
             unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
@@ -120,6 +121,7 @@ function resetMonitoring() {
 	    stream = null;  // signal to event handlers to ignore end/destroy
 		tempStream.destroySilent();
 	}
+	  monitoringCompany = "";
 }
 module.exports = {
 
