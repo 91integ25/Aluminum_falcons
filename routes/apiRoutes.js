@@ -9,6 +9,7 @@ var db = require("../models");
 var jwt = require('jsonwebtoken');
 var stream;
 var tweetCount;
+var monitoringCompany;
 var tweetTotalSentiment;
 
 var client = new Twitter({
@@ -42,15 +43,8 @@ function beginMonitoring(company,cb) {
     monitoringCompany = company;
     tweetCount = 0;
     tweetTotalSentiment = 0;
-    tweeter.verifyCredentials(function (error, data) {
-        if (error) {
-        	resetMonitoring();
-            console.error("Error connecting to Twitter: " + error);
-            if (error.statusCode === 401)  {
-	            console.error("Authorization failure.  Check your API keys.");
-            }
-        } else {
-            tweeter.stream('statuses/filter', {
+   
+            client.stream('statuses/filter', {
                 'track': monitoringCompany
             }, function (inStream) {
             	// remember the stream so we can destroy it when we create a new one.
@@ -60,14 +54,11 @@ function beginMonitoring(company,cb) {
                 stream.on('data', function (data) {
                     // only evaluate the sentiment of English-language tweets
                     if (data.lang === 'en') {
-                        sentiment(data.text, function (err, result) {
-                            tweetCount++;
-                            tweetTotalSentiment += result.score;
-                        });
+                        cb(data.text);
                     }
                 });
                 stream.on('error', function (error, code) {
-	                console.error("Error received from tweet stream: " + code);
+	                console.error("Error received from tweet stream: " + error);
 		            if (code === 420)  {
 	    		        console.error("API limit hit, are you using your own keys?");
             		}
@@ -87,14 +78,12 @@ function beginMonitoring(company,cb) {
 				});
             });
             return stream;
-        }
-    });
 }
 
 
 function awsApi(cb, company) {
     var apiResults = []
-    beginMonitoring(company, function(tweetArr) {
+    beginMonitoring(company, function(tweet) {
 
         for (var i = 0; i < tweetArr.length; i++) {
             unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
