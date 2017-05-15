@@ -33,6 +33,63 @@ function tweetsData(company, cb) {
         }
     });
 }
+function beginMonitoring(phrase,cb) {
+    // cleanup if we're re-setting the monitoring
+    if (monitoringPhrase) {
+        resetMonitoring();
+    }
+    monitoringPhrase = phrase;
+    tweetCount = 0;
+    tweetTotalSentiment = 0;
+    tweeter.verifyCredentials(function (error, data) {
+        if (error) {
+        	resetMonitoring();
+            console.error("Error connecting to Twitter: " + error);
+            if (error.statusCode === 401)  {
+	            console.error("Authorization failure.  Check your API keys.");
+            }
+        } else {
+            tweeter.stream('statuses/filter', {
+                'track': monitoringPhrase
+            }, function (inStream) {
+            	// remember the stream so we can destroy it when we create a new one.
+            	// if we leak streams, we end up hitting the Twitter API limit.
+            	stream = inStream;
+                console.log("Monitoring Twitter for " + monitoringPhrase);
+                stream.on('data', function (data) {
+                    // only evaluate the sentiment of English-language tweets
+                    if (data.lang === 'en') {
+                        sentiment(data.text, function (err, result) {
+                            tweetCount++;
+                            tweetTotalSentiment += result.score;
+                        });
+                    }
+                });
+                stream.on('error', function (error, code) {
+	                console.error("Error received from tweet stream: " + code);
+		            if (code === 420)  {
+	    		        console.error("API limit hit, are you using your own keys?");
+            		}
+	                resetMonitoring();
+                });
+				stream.on('end', function (response) {
+					if (stream) { // if we're not in the middle of a reset already
+					    // Handle a disconnection
+		                console.error("Stream ended unexpectedly, resetting monitoring.");
+		                resetMonitoring();
+	                }
+				});
+				stream.on('destroy', function (response) {
+				    // Handle a 'silent' disconnection from Twitter, no end/error event fired
+	                console.error("Stream destroyed unexpectedly, resetting monitoring.");
+	                resetMonitoring();
+				});
+            });
+            return stream;
+        }
+    });
+}
+
 
 function awsApi(cb, company) {
     var apiResults = []
