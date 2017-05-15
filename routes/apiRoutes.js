@@ -7,7 +7,7 @@ var bcrypt = require('bcrypt');
 var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
 var db = require("../models");
 var jwt = require('jsonwebtoken');
-
+var stream;
 var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
 
 var client = new Twitter({
@@ -20,11 +20,15 @@ var client = new Twitter({
 
 function tweetsData(company, cb) {
     console.log(company)
-    var stream = client.stream('statuses/filter', { track: company });
+  		client.stream('statuses/filter', { track: company },function(inStream){
+    	stream = inStream;
+    });
     var arr = [];
     stream.on('data', function(event) {
         arr.push(event.text);
-        if (arr.length === 20) {
+       
+
+        if (arr.length === 20){
             cb(arr);
         }
     });
@@ -53,10 +57,17 @@ function awsApi(cb, company) {
     });
 };
 
+function resetMonitoring() {
+	if (stream) {
+		var tempStream = stream;
+	    stream = null;  // signal to event handlers to ignore end/destroy
+		tempStream.destroySilent();
+	}
+}
 module.exports = {
 
         route: function(app) {
-               console.log(bcrypt.genSaltSync(10))
+             
                     // POST route for creating a new user changed apiRouter to app
                     //TODO will app work without a var app
                 app.post("/user", function(req, res) {
@@ -74,8 +85,9 @@ module.exports = {
                             .catch(function(err) {
                                 res.status(500).send(err);
                             })
+                    });
 
-
+     			});	
 
 
 		app.post("/api/create_stock",function(req,res){
@@ -94,6 +106,7 @@ module.exports = {
 				//res.json({company: req.body.company,sentiment:data});
 			},req.body.company)
 		});
+
 
 // 		app.post("/sign-up",function(req,res){
 // 			console.log(req.body)
@@ -129,14 +142,7 @@ module.exports = {
 		  });
 
 		});
-	}
-
-
-                    });
-
-
-                });
-                app.post("/user/signin", function(req, res) {
+			app.post("/user/signin", function(req, res) {
                     db.User.findOne({
                             username: req.body.username
                         })
@@ -170,3 +176,7 @@ module.exports = {
                         });
                 });
 
+
+}
+
+}
