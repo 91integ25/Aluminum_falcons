@@ -22,6 +22,7 @@ app.set("view engine","handlebars");
 apiRoutes.route(app);
 //app.use(app.router); no longer needed
 //routes.initialize(app);
+app.use("/",routes);
 
 //app.use('/api', apiRoutes);
 app.use('/api/secure', function (req, res, next) {

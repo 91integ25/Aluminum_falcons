@@ -8,7 +8,7 @@ var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
 var db = require("../models");
 var jwt = require('jsonwebtoken');
 var stream;
-var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
+
 
 var client = new Twitter({
     consumer_key: keys.consumer_key,
@@ -123,25 +123,25 @@ module.exports = {
 // 			})
 // 		});
 
-		app.get("/test", function(req, res) {
-		  res.status(200).json({ 'message': 'Success'})
-		});
+		// app.get("/test", function(req, res) {
+		//   res.status(200).json({ 'message': 'Success'})
+		// });
 		
-		// POST route for creating a new user
-		app.post("/user", function(req, res) {
-		  bcrypt.hash(req.body.password, salt, function(err, hash) {
-		    // Store hash in your password DB.
-		    // TODO: update schema to enforce unique usernames
-		    db.User.create({
-		      username: req.body.username,
-		      password: hash
-		    })
-		      .then(function(dbPost) {
-		        res.status(200).json({'status': 'success'});
-		      });
-		  });
+		// // POST route for creating a new user
+		// app.post("/user", function(req, res) {
+		//   bcrypt.hash(req.body.password, salt, function(err, hash) {
+		//     // Store hash in your password DB.
+		//     // TODO: update schema to enforce unique usernames
+		//     db.User.create({
+		//       username: req.body.username,
+		//       password: hash
+		//     })
+		//       .then(function(dbPost) {
+		//         res.status(200).json({'status': 'success'});
+		//       });
+		//   });
 
-		});
+		// });
 			app.post("/user/signin", function(req, res) {
                     db.User.findOne({
                             username: req.body.username
