@@ -11,6 +11,7 @@
     "jsonwebtoken": "^7.4.0",
     "method-override": "^2.3.8",
     "mysql": "^2.13.0",
+    "ntwitter": "^0.5.0",
     "request-promise": "^4.2.1",
     "sentiment": "^4.0.0",
     "sequelize": "^3.30.4",
