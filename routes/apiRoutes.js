@@ -19,26 +19,24 @@ var client = new twitter({
     access_token_secret: keys.access_secret
 });
 
-// function tweetsData(company, cb) {
-//     console.log(company)
-//
-// }
+function tweetsData(company, cb) {
+    console.log(company)
+  		client.stream('statuses/filter', { track: company },function(inStream){
+    	stream = inStream;
+    });
+    var arr = [];
+    stream.on('data', function(event) {
+        arr.push(event.text);
+
+
+        if (arr.length === 20){
+            cb(arr);
+        }
+    });
+}
 
 function beginMonitoring(company,cb) {
     // cleanup if we're re-setting the monitoring
-    client.stream('statuses/filter', { track: company },function(inStream){
-    stream = inStream;
-  });
-  var arr = [];
-  stream.on('data', function(event) {
-      arr.push(event.text);
-
-
-      if (arr.length === 20){
-          cb(arr);
-      }
-  });
-
     if (monitoringCompany) {
         resetMonitoring();
     }
