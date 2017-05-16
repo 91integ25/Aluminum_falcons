@@ -11,6 +11,7 @@ var stream;
 var tweetCount;
 var monitoringCompany;
 var tweetTotalSentiment;
+var sentiment = require("sentiment");
 
 var client = new Twitter({
     consumer_key: keys.consumer_key,
@@ -35,7 +36,7 @@ function tweetsData(company, cb) {
         }
     });
 }
-function beginMonitoring(company,cb) {
+function beginMonitoring(cb,company) {
     // cleanup if we're re-setting the monitoring
     if (monitoringCompany) {
         resetMonitoring();
@@ -43,7 +44,7 @@ function beginMonitoring(company,cb) {
     monitoringCompany = company;
     tweetCount = 0;
     tweetTotalSentiment = 0;
-   
+  
             client.stream('statuses/filter', {
                 'track': monitoringCompany
             }, function (inStream) {
@@ -54,7 +55,14 @@ function beginMonitoring(company,cb) {
                 stream.on('data', function (data) {
                     // only evaluate the sentiment of English-language tweets
                     if (data.lang === 'en') {
-                        cb(data.text);
+                        sentiment(data.text, function (err, result){
+                            tweetCount++;
+                            tweetTotalSentiment += result.score;
+                            var tweetAvg = tweetTotalSentiment/tweetCount;
+                            console.log("result.score", result.score)
+                            console.log("tweetAvg:", tweetAvg)
+                            cb(tweetTotalSentiment);
+                        });
                     }
                 });
                 stream.on('error', function (error, code) {
@@ -81,34 +89,17 @@ function beginMonitoring(company,cb) {
 }
 
 
-function awsApi(cb, company) {
-    var apiResults = []
-    beginMonitoring(company, function(tweet) {
-
-        for (var i = 0; i < tweetArr.length; i++) {
-            unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
-                .header("X-Mashape-Key", "BOEwktCNBDmshSUeLunnuyGLz48wp1yHuyljsnNDWN4oLTDPPG")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("Accept", "application/json")
-                .send("text=" + tweetArr[i])
-                .end(function(result) {
-                    apiResults.push(result.body);
-
-                    if (apiResults.length === i) {
-                        cb(apiResults);
-                    }
-
-                });
-
-        }
-    });
+function sentitwit(cb, company) {
+beginMonitoring(function(score){
+	cb(score);
+},company)
 };
 
 function resetMonitoring() {
 	if (stream) {
 		var tempStream = stream;
 	    stream = null;  // signal to event handlers to ignore end/destroy
-		tempStream.destroySilent();
+		tempStream.destroy();
 	}
 	  monitoringCompany = "";
 }
@@ -139,20 +130,13 @@ module.exports = {
 
 
 		app.post("/api/create_stock",function(req,res){
-			awsApi(function(data){
-				console.log("data arr: ",data);
-				//console.log("this worked",data);
-				var dataNum = data.map(function(e){
-					return Number(e.score);
-				})
-				var dataReduced = dataNum.reduce(function(a,b){
-					return a + b;
-				})
-				console.log(dataReduced, dataReduced/data.length);
-				res.send("this post worked");
-				//console.log(req.body)
-				//res.json({company: req.body.company,sentiment:data});
-			},req.body.company)
+		sentitwit(function(score){
+						var stock = {
+				company:req.body.company,
+				setiment:score
+			}	
+				res.render("website",stock)
+				},req.body.company);
 		});
 
 
