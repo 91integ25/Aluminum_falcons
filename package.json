@@ -9,11 +9,13 @@
     "express-handlebars": "^3.0.0",
     "method-override": "^2.3.8",
     "mysql": "^2.13.0",
+    "nodemailer": "^4.0.1",
     "request-promise": "^4.2.1",
     "sentiment": "^4.0.0",
     "sequelize": "^3.30.4",
     "twitter": "^1.7.0",
-    "unirest": "^0.5.1"
+    "unirest": "^0.5.1",
+    "xoauth2": "^1.2.0"
   },
   "devDependencies": {},
   "scripts": {
