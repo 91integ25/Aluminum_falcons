@@ -28,7 +28,7 @@
                         </li>
 <!--------Log-in/Sign-Up Drop-down ------>
 
-                        <li>Logged in as {{this.userName}}</li>
+                       <!--  <li>Logged in as {{this.userName}}</li> -->
                     </ul>
                 </div>
                 <!-- /.navbar-collapse -->
@@ -57,10 +57,10 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2">
                     <h2>Company Search</h2>
-                    <form class="create-form">
+                    <form class="create-form" action="/api/createStock" method="post">
                         <div class="form-group">
                             <label for="kw">Ticker:</label>
-                            <input type="text" id="kw" name="keyword">
+                            <input type="text" id="kw" name="company">
                         </div>
                         <button type="submit">Search</button>
                     </form>
@@ -72,7 +72,8 @@
             <div class="download-section">
                 <div class="container">
                     <div class="col-lg-8 col-lg-offset-2">
-                      {{this.}}
+                      <h1>current Sentiment{{this.score}}</h1>
+                      <h2>Stock Name {{this.company}}</h2>
                     </div>
                 </div>
             </div>

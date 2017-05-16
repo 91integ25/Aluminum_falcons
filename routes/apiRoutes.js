@@ -55,10 +55,13 @@ function beginMonitoring(cb,company) {
                 stream.on('data', function (data) {
                     // only evaluate the sentiment of English-language tweets
                     if (data.lang === 'en') {
-                        sentiment(data.text, function (err, result) {
+                        sentiment(data.text, function (err, result){
                             tweetCount++;
                             tweetTotalSentiment += result.score;
-                            cb(result.score);
+                            var tweetAvg = tweetTotalSentiment/tweetCount;
+                            console.log("result.score", result.score)
+                            console.log("tweetAvg:", tweetAvg)
+                            cb(tweetTotalSentiment);
                         });
                     }
                 });
@@ -86,7 +89,7 @@ function beginMonitoring(cb,company) {
 }
 
 
-function awsApi(cb, company) {
+function sentitwit(cb, company) {
 beginMonitoring(function(score){
 	cb(score);
 },company)
@@ -127,8 +130,12 @@ module.exports = {
 
 
 		app.post("/api/create_stock",function(req,res){
-			awsApi(function(score){
-				console.log(score);
+		sentitwit(function(score){
+						var stock = {
+				company:req.body.company,
+				setiment:score
+			}	
+				res.render("website",stock)
 				},req.body.company);
 		});
 
