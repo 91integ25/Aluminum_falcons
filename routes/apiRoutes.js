@@ -118,59 +118,9 @@ function resetMonitoring() {
 		tempStream.destroy();
 	};
 }
-// POST route for creating a new user changed apiRouter to app
-        //TODO will app work without a var app
-module.exports = {
-    route: function(app) {        
-        app.post("/user", function(req, res) {
-            bcrypt.hash(req.body.password, salt, function(err, hash) {
-                // Store hash in your password DB.
-                // TODO: update schema to enforce unique usernames
-                db.User.create({
-                        username: req.body.username,
-                        email: req.body.email,
-                        password: hash
-                    })
-                    .then(function(dbPost) {
-                        res.status(200).json({ "status": "success" });
-                    })
-                    .catch(function(err) {
-                        res.status(500).send(err);
-                    })
-            });
-  });	
-		app.post("/api/create_stock",function(req,res){
-		sentitwit(function(score){
-						var stock = {
-				company:req.body.company,
-				sentiment:score
-			}	
-				res.render("website",stock)
-				},req.body.company);
-		});
-		// 		app.post("/sign-up",function(req,res){
-		// 			console.log(req.body)
-		// 			db.User.create(req.body).then(function(){
-		// 				res.json(req.body);
-		// 			});
-		// 		});
-		// 		app.get("/log-in",function(req,res){
-		// 			db.User.findOne({
-		// 				userName:req.body.userName
-		// 			}).then(function(result){
-		// 				res.render("website",result);
-		// 			})
-		// 		});
-		// app.get("/test", function(req, res) {
-		//   res.status(200).json({ 'message': 'Success'})
-		// });	
-	}
 
-}
 module.exports = {
-
         route: function(app) {
-
                     // POST route for creating a new user changed apiRouter to app
                     //TODO will app work without a var app
                 app.post("/user", function(req, res) {
@@ -206,40 +156,6 @@ module.exports = {
       				},req.body.company);
       		});
 
-
-// 		app.post("/sign-up",function(req,res){
-// 			console.log(req.body)
-// 			db.User.create(req.body).then(function(){
-// 				res.json(req.body);
-// 			});
-// 		});
-
-// 		app.get("/log-in",function(req,res){
-// 			db.User.findOne({
-// 				userName:req.body.userName
-// 			}).then(function(result){
-// 				res.render("website",result);
-// 			})
-// 		});
-
-		// app.get("/test", function(req, res) {
-		//   res.status(200).json({ 'message': 'Success'})
-		// });
-		// // POST route for creating a new user
-		// app.post("/user", function(req, res) {
-		//   bcrypt.hash(req.body.password, salt, function(err, hash) {
-		//     // Store hash in your password DB.
-		//     // TODO: update schema to enforce unique usernames
-		//     db.User.create({
-		//       username: req.body.username,
-		//       password: hash
-		//     })
-		//       .then(function(dbPost) {
-		//         res.status(200).json({'status': 'success'});
-		//       });
-		//   });
-		// });
-		
 			app.post("/user/signin", function(req, res) {
                     db.User.findOne({
                             username: req.body.username
