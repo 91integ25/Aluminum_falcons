@@ -165,7 +165,7 @@ module.exports = {
 		//   res.status(200).json({ 'message': 'Success'})
 		// });	
 	}
-	  monitoringCompany = "";
+	 
 }
 module.exports = {
 
@@ -183,7 +183,10 @@ module.exports = {
                                 password: hash
                             })
                             .then(function(dbPost) {
-                                res.status(200).json({ 'status': 'success' });
+                            	var status = {
+                            		status:"You have completed sign up log in to continue"
+                            	}
+                                res.status(200).render("homepage",status);
                             })
                             .catch(function(err) {
                                 res.status(500).send(err);
@@ -199,7 +202,7 @@ module.exports = {
       				company:req.body.company,
       				sentiment:score
       			}
-      				res.render("website",stock)
+      			
       				},req.body.company);
       		});
 
@@ -244,24 +247,25 @@ module.exports = {
                         .then(function(user) {
                             if (!user) {
                                 console.log('no user found')
-                                res.status(400).json({
+                                res.status(400).render("homepage",{
                                     'status': 'Invalid username or password'
                                 })
                             } else {
                                 bcrypt.compare(req.body.password, user.password, function(err, valid) {
                                     if (err || !valid) {
-                                        res.status(400).json({
+                                        res.status(400).render("homepage",{
                                             'status': 'Invalid username or password'
                                         })
                                     } else {
                                         var userToken = jwt.sign({
                                             //expires in one hour
                                             exp: Math.floor(Date.now() / 1000) + (60 * 60),
-                                            data: user.id,
-                                        }, "randomsecretforsigningjwt");
-                                        res.status(200).json({
+											data: user.id
+                                        }, 'randomsecretforsigningjwt');
+                                        res.status(200).render("homepage",{
                                             id: user.id,
                                             username: user.username,
+                                            loggedIn:true,
                                             token: userToken
                                         });
                                     }
