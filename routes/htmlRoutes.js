@@ -9,5 +9,11 @@ router.get("/logged-in",function(req,res){
 	res.render("website");
 })
 
+router.get("/website", function(req,res){
+	res.render("homepage", {
+		loggedIn: true
+	});
+});
+
 
 module.exports = router;
