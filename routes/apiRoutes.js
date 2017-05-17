@@ -8,9 +8,7 @@ var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
 var db = require("../models");
 var jwt = require('jsonwebtoken');
 var stream;
-var tweetCount;
-var monitoringCompany;
-var tweetTotalSentiment;
+
 
 var client = new Twitter({
     consumer_key: keys.consumer_key,
@@ -35,55 +33,10 @@ function tweetsData(company, cb) {
         }
     });
 }
-function beginMonitoring(company,cb) {
-    // cleanup if we're re-setting the monitoring
-    if (monitoringCompany) {
-        resetMonitoring();
-    }
-    monitoringCompany = company;
-    tweetCount = 0;
-    tweetTotalSentiment = 0;
-   
-            client.stream('statuses/filter', {
-                'track': monitoringCompany
-            }, function (inStream) {
-            	// remember the stream so we can destroy it when we create a new one.
-            	// if we leak streams, we end up hitting the Twitter API limit.
-            	stream = inStream;
-                console.log("Monitoring Twitter for " + monitoringCompany);
-                stream.on('data', function (data) {
-                    // only evaluate the sentiment of English-language tweets
-                    if (data.lang === 'en') {
-                        cb(data.text);
-                    }
-                });
-                stream.on('error', function (error, code) {
-	                console.error("Error received from tweet stream: " + error);
-		            if (code === 420)  {
-	    		        console.error("API limit hit, are you using your own keys?");
-            		}
-	                resetMonitoring();
-                });
-				stream.on('end', function (response) {
-					if (stream) { // if we're not in the middle of a reset already
-					    // Handle a disconnection
-		                console.error("Stream ended unexpectedly, resetting monitoring.");
-		                resetMonitoring();
-	                }
-				});
-				stream.on('destroy', function (response) {
-				    // Handle a 'silent' disconnection from Twitter, no end/error event fired
-	                console.error("Stream destroyed unexpectedly, resetting monitoring.");
-	                resetMonitoring();
-				});
-            });
-            return stream;
-}
-
 
 function awsApi(cb, company) {
     var apiResults = []
-    beginMonitoring(company, function(tweet) {
+    tweetsData(company, function(tweetArr) {
 
         for (var i = 0; i < tweetArr.length; i++) {
             unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
@@ -110,32 +63,31 @@ function resetMonitoring() {
 	    stream = null;  // signal to event handlers to ignore end/destroy
 		tempStream.destroySilent();
 	}
-	  monitoringCompany = "";
 }
 module.exports = {
 
-        route: function(app) {
-             
-                    // POST route for creating a new user changed apiRouter to app
-                    //TODO will app work without a var app
-                app.post("/user", function(req, res) {
-                    bcrypt.hash(req.body.password, salt, function(err, hash) {
-                        // Store hash in your password DB.
-                        // TODO: update schema to enforce unique usernames
-                        db.User.create({
-                                username: req.body.username,
-                                email: req.body.email,
-                                password: hash
-                            })
-                            .then(function(dbPost) {
-                                res.status(200).json({ 'status': 'success' });
-                            })
-                            .catch(function(err) {
-                                res.status(500).send(err);
-                            })
-                    });
+    route: function(app) {
+         
+        // POST route for creating a new user changed apiRouter to app
+        //TODO will app work without a var app
+        app.post("/user", function(req, res) {
+            bcrypt.hash(req.body.password, salt, function(err, hash) {
+                // Store hash in your password DB.
+                // TODO: update schema to enforce unique usernames
+                db.User.create({
+                        username: req.body.username,
+                        email: req.body.email,
+                        password: hash
+                    })
+                    .then(function(dbPost) {
+                        res.status(200).json({ 'status': 'success' });
+                    })
+                    .catch(function(err) {
+                        res.status(500).send(err);
+                    })
+            });
 
-     			});	
+		});	
 
 
 		app.post("/api/create_stock",function(req,res){
@@ -156,20 +108,20 @@ module.exports = {
 		});
 
 
-// 		app.post("/sign-up",function(req,res){
-// 			console.log(req.body)
-// 			db.User.create(req.body).then(function(){
-// 				res.json(req.body);
-// 			});
-// 		});
+		// 		app.post("/sign-up",function(req,res){
+		// 			console.log(req.body)
+		// 			db.User.create(req.body).then(function(){
+		// 				res.json(req.body);
+		// 			});
+		// 		});
 
-// 		app.get("/log-in",function(req,res){
-// 			db.User.findOne({
-// 				userName:req.body.userName
-// 			}).then(function(result){
-// 				res.render("website",result);
-// 			})
-// 		});
+		// 		app.get("/log-in",function(req,res){
+		// 			db.User.findOne({
+		// 				userName:req.body.userName
+		// 			}).then(function(result){
+		// 				res.render("website",result);
+		// 			})
+		// 		});
 
 		// app.get("/test", function(req, res) {
 		//   res.status(200).json({ 'message': 'Success'})
@@ -190,41 +142,37 @@ module.exports = {
 		//   });
 
 		// });
-			app.post("/user/signin", function(req, res) {
-                    db.User.findOne({
-                            username: req.body.username
-                        })
-                        .then(function(user) {
-                            if (!user) {
-                                console.log('no user found')
-                                res.status(400).json({
-                                    'status': 'Invalid username or password'
-                                })
-                            } else {
-                                bcrypt.compare(req.body.password, user.password, function(err, valid) {
-                                    if (err || !valid) {
-                                        res.status(400).json({
-                                            'status': 'Invalid username or password'
-                                        })
-                                    } else {
-                                        var userToken = jwt.sign({
-                                            //expires in one hour
-                                            exp: Math.floor(Date.now() / 1000) + (60 * 60),
-                                            data: user.id,
-                                        }, 'randomsecretforsigningjwt');
-                                        res.status(200).json({
-                                            id: user.id,
-                                            username: user.username,
-                                            token: userToken
-                                        });
-                                    }
-                                });
-                            }
+		app.post("/user/signin", function(req, res) {
+		    db.User.findOne({
+		            username: req.body.username
+		        })
+		        .then(function(user) {
+		            if (!user) {
+		                console.log('no user found')
+		                res.status(400).json({
+		                    'status': 'Invalid username or password'
+		                })
+		            } else {
+		                bcrypt.compare(req.body.password, user.password, function(err, valid) {
+		                    if (err || !valid) {
+		                        res.status(400).json({
+		                            'status': 'Invalid username or password'
+		                        })
+		                    } else {
+		                        var userToken = jwt.sign({
+		                            //expires in one hour
+		                            exp: Math.floor(Date.now() / 1000) + (60 * 60),
+		                            data: user.id,
+		                        }, 'randomsecretforsigningjwt');
+		                        res.status(200).send(userToken).redirect('/');
+		                    }
+		                });
+		            }
 
-                        });
-                });
+		        });
+		});
 
 
-}
+	}
 
 }
