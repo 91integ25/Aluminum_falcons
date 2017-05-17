@@ -133,7 +133,7 @@ module.exports = {
 		sentitwit(function(score){
 						var stock = {
 				company:req.body.company,
-				setiment:score
+				sentiment:score
 			}	
 				res.render("website",stock)
 				},req.body.company);
