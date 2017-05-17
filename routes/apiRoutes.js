@@ -9,6 +9,11 @@ var db = require("../models");
 var jwt = require('jsonwebtoken');
 var stream;
 
+var tweetCount;
+var monitoringCompany;
+var tweetTotalSentiment;
+var sentiment = require("sentiment");
+
 
 var client = new Twitter({
     consumer_key: keys.consumer_key,
@@ -34,6 +39,7 @@ function tweetsData(company, cb) {
     });
 }
 
+
 function awsApi(cb, company) {
     var apiResults = []
     tweetsData(company, function(tweetArr) {
@@ -55,13 +61,72 @@ function awsApi(cb, company) {
 
         }
     });
+
+function beginMonitoring(cb,company) {
+    // cleanup if we're re-setting the monitoring
+    if (monitoringCompany) {
+        resetMonitoring();
+    }
+    monitoringCompany = company;
+    tweetCount = 0;
+    tweetTotalSentiment = 0;
+  
+            client.stream('statuses/filter', {
+                'track': monitoringCompany
+            }, function (inStream) {
+            	// remember the stream so we can destroy it when we create a new one.
+            	// if we leak streams, we end up hitting the Twitter API limit.
+            	stream = inStream;
+                console.log("Monitoring Twitter for " + monitoringCompany);
+                stream.on('data', function (data) {
+                    // only evaluate the sentiment of English-language tweets
+                    if (data.lang === 'en') {
+                        sentiment(data.text, function (err, result){
+                            tweetCount++;
+                            tweetTotalSentiment += result.score;
+                            var tweetAvg = tweetTotalSentiment/tweetCount;
+                            console.log("result.score", result.score)
+                            console.log("tweetAvg:", tweetAvg)
+                            cb(tweetTotalSentiment);
+                        });
+                    }
+                });
+                stream.on('error', function (error, code) {
+	                console.error("Error received from tweet stream: " + error);
+		            if (code === 420)  {
+	    		        console.error("API limit hit, are you using your own keys?");
+            		}
+	                resetMonitoring();
+                });
+				stream.on('end', function (response) {
+					if (stream) { // if we're not in the middle of a reset already
+					    // Handle a disconnection
+		                console.error("Stream ended unexpectedly, resetting monitoring.");
+		                resetMonitoring();
+	                }
+				});
+				stream.on('destroy', function (response) {
+				    // Handle a 'silent' disconnection from Twitter, no end/error event fired
+	                console.error("Stream destroyed unexpectedly, resetting monitoring.");
+	                resetMonitoring();
+				});
+            });
+            return stream;
+}
+
+
+function sentitwit(cb, company) {
+beginMonitoring(function(score){
+	cb(score);
+},company)
+
 };
 
 function resetMonitoring() {
 	if (stream) {
 		var tempStream = stream;
 	    stream = null;  // signal to event handlers to ignore end/destroy
-		tempStream.destroySilent();
+		tempStream.destroy();
 	}
 }
 module.exports = {
@@ -91,20 +156,13 @@ module.exports = {
 
 
 		app.post("/api/create_stock",function(req,res){
-			awsApi(function(data){
-				console.log("data arr: ",data);
-				//console.log("this worked",data);
-				var dataNum = data.map(function(e){
-					return Number(e.score);
-				})
-				var dataReduced = dataNum.reduce(function(a,b){
-					return a + b;
-				})
-				console.log(dataReduced, dataReduced/data.length);
-				res.send("this post worked");
-				//console.log(req.body)
-				//res.json({company: req.body.company,sentiment:data});
-			},req.body.company)
+		sentitwit(function(score){
+						var stock = {
+				company:req.body.company,
+				sentiment:score
+			}	
+				res.render("website",stock)
+				},req.body.company);
 		});
 
 
