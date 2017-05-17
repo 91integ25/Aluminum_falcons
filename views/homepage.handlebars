@@ -122,10 +122,13 @@
             <div class="row">
                 <div class="col-lg-8 col-lg-offset-2">
                     <h2>Company Search</h2>
-                    <form class="create-form">
-                        <div class="form-group">
+                    <form class="create-form" action="/api/create_stock" method="post">
+                        <div class="form-group" >
                             <label for="kw">Ticker:</label>
-                            <input type="text" id="kw" name="keyword">
+                            <input type="hidden" name="loggedIn" value="true">
+                            <input type="hidden" name="username" value="{{this.username}}">
+                            <input type="hidden" name="UserId" value="{{this.id}}">
+                            <input class="form-control" type="text" id="kw" name="company">
                         </div>
                         <button type="submit">Search</button>
                     </form>
