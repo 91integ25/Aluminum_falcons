@@ -165,7 +165,7 @@ module.exports = {
 		//   res.status(200).json({ 'message': 'Success'})
 		// });	
 	}
-	 
+
 }
 module.exports = {
 
@@ -260,7 +260,7 @@ module.exports = {
                                         var userToken = jwt.sign({
                                             //expires in one hour
                                             exp: Math.floor(Date.now() / 1000) + (60 * 60),
-											data: user.id
+											                      data: user.id
                                         }, 'randomsecretforsigningjwt');
                                         res.status(200).render("homepage",{
                                             id: user.id,
