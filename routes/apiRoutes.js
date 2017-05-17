@@ -1,12 +1,11 @@
-var keys = require('../keys');
-var Twitter = require('twitter');
+var keys = require("../keys");
+var Twitter = require("twitter");
 var unirest = require("unirest");
-var express = require('express');
+var express = require("express");
 var db = require("../models");
-var bcrypt = require('bcrypt');
-var salt = '$2a$10$.zvkhL71NZo804bNdFdBae';
-var db = require("../models");
-var jwt = require('jsonwebtoken');
+var bcrypt = require("bcrypt");
+var salt = "$2a$10$.zvkhL71NZo804bNdFdBae";
+var jwt = require("jsonwebtoken");
 var stream;
 
 var tweetCount;
@@ -22,28 +21,24 @@ var client = new Twitter({
     access_token_secret: keys.access_secret
 });
 
-
 function tweetsData(company, cb) {
-    console.log(company)
-  		client.stream('statuses/filter', { track: company },function(inStream){
+    console.log(company);
+  		client.stream("statuses/filter", { track: company },function(inStream){
     	stream = inStream;
     });
     var arr = [];
-    stream.on('data', function(event) {
-        arr.push(event.text);
-       
-
+    stream.on("data", function(event) {
+        arr.push(event.text);      
         if (arr.length === 20){
             cb(arr);
         }
     });
-}
-
+};
 
 function awsApi(cb, company) {
-    var apiResults = []
+    var apiResults = [];
     tweetsData(company, function(tweetArr) {
-
+//JSLINT says unexpected for and unexpected var
         for (var i = 0; i < tweetArr.length; i++) {
             unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
                 .header("X-Mashape-Key", "BOEwktCNBDmshSUeLunnuyGLz48wp1yHuyljsnNDWN4oLTDPPG")
@@ -56,9 +51,7 @@ function awsApi(cb, company) {
                     if (apiResults.length === i) {
                         cb(apiResults);
                     }
-
                 });
-
         }
     });
 
@@ -70,17 +63,16 @@ function beginMonitoring(cb,company) {
     monitoringCompany = company;
     tweetCount = 0;
     tweetTotalSentiment = 0;
-  
-            client.stream('statuses/filter', {
-                'track': monitoringCompany
+            client.stream("statuses/filter", {
+                "track": monitoringCompany
             }, function (inStream) {
             	// remember the stream so we can destroy it when we create a new one.
             	// if we leak streams, we end up hitting the Twitter API limit.
             	stream = inStream;
                 console.log("Monitoring Twitter for " + monitoringCompany);
-                stream.on('data', function (data) {
+                stream.on("data", function (data) {
                     // only evaluate the sentiment of English-language tweets
-                    if (data.lang === 'en') {
+                    if (data.lang === "en") {
                         sentiment(data.text, function (err, result){
                             tweetCount++;
                             tweetTotalSentiment += result.score;
@@ -91,35 +83,34 @@ function beginMonitoring(cb,company) {
                         });
                     }
                 });
-                stream.on('error', function (error, code) {
+                stream.on("error", function (error, code) {
 	                console.error("Error received from tweet stream: " + error);
 		            if (code === 420)  {
 	    		        console.error("API limit hit, are you using your own keys?");
             		}
 	                resetMonitoring();
                 });
-				stream.on('end', function (response) {
+				stream.on("end", function (response) {
 					if (stream) { // if we're not in the middle of a reset already
 					    // Handle a disconnection
 		                console.error("Stream ended unexpectedly, resetting monitoring.");
 		                resetMonitoring();
 	                }
 				});
-				stream.on('destroy', function (response) {
+				stream.on("destroy", function (response) {
 				    // Handle a 'silent' disconnection from Twitter, no end/error event fired
 	                console.error("Stream destroyed unexpectedly, resetting monitoring.");
 	                resetMonitoring();
 				});
             });
             return stream;
-}
+};
 
 
 function sentitwit(cb, company) {
 beginMonitoring(function(score){
 	cb(score);
 },company)
-
 };
 
 function resetMonitoring() {
@@ -127,14 +118,12 @@ function resetMonitoring() {
 		var tempStream = stream;
 	    stream = null;  // signal to event handlers to ignore end/destroy
 		tempStream.destroy();
-	}
+	};
 }
-module.exports = {
-
-    route: function(app) {
-         
-        // POST route for creating a new user changed apiRouter to app
+// POST route for creating a new user changed apiRouter to app
         //TODO will app work without a var app
+module.exports = {
+    route: function(app) {        
         app.post("/user", function(req, res) {
             bcrypt.hash(req.body.password, salt, function(err, hash) {
                 // Store hash in your password DB.
@@ -145,16 +134,13 @@ module.exports = {
                         password: hash
                     })
                     .then(function(dbPost) {
-                        res.status(200).json({ 'status': 'success' });
+                        res.status(200).json({ "status": "success" });
                     })
                     .catch(function(err) {
                         res.status(500).send(err);
                     })
             });
-
-		});	
-
-
+  });	
 		app.post("/api/create_stock",function(req,res){
 		sentitwit(function(score){
 						var stock = {
@@ -164,15 +150,12 @@ module.exports = {
 				res.render("website",stock)
 				},req.body.company);
 		});
-
-
 		// 		app.post("/sign-up",function(req,res){
 		// 			console.log(req.body)
 		// 			db.User.create(req.body).then(function(){
 		// 				res.json(req.body);
 		// 			});
 		// 		});
-
 		// 		app.get("/log-in",function(req,res){
 		// 			db.User.findOne({
 		// 				userName:req.body.userName
@@ -180,11 +163,9 @@ module.exports = {
 		// 				res.render("website",result);
 		// 			})
 		// 		});
-
 		// app.get("/test", function(req, res) {
 		//   res.status(200).json({ 'message': 'Success'})
-		// });
-		
+		// });	
 		// // POST route for creating a new user
 		// app.post("/user", function(req, res) {
 		//   bcrypt.hash(req.body.password, salt, function(err, hash) {
@@ -198,7 +179,6 @@ module.exports = {
 		//         res.status(200).json({'status': 'success'});
 		//       });
 		//   });
-
 		// });
 		app.post("/user/signin", function(req, res) {
 		    db.User.findOne({
@@ -206,31 +186,27 @@ module.exports = {
 		        })
 		        .then(function(user) {
 		            if (!user) {
-		                console.log('no user found')
+		                console.log("no user found")
 		                res.status(400).json({
-		                    'status': 'Invalid username or password'
+		                    "status": "Invalid username or password"
 		                })
 		            } else {
 		                bcrypt.compare(req.body.password, user.password, function(err, valid) {
 		                    if (err || !valid) {
 		                        res.status(400).json({
-		                            'status': 'Invalid username or password'
+		                            "status": "Invalid username or password"
 		                        })
 		                    } else {
 		                        var userToken = jwt.sign({
 		                            //expires in one hour
 		                            exp: Math.floor(Date.now() / 1000) + (60 * 60),
-		                            data: user.id,
-		                        }, 'randomsecretforsigningjwt');
-		                        res.status(200).send(userToken).redirect('/');
+		                            data: user.id
+		                        }, "randomsecretforsigningjwt");
+		                        res.status(200).send(userToken).redirect("/");
 		                    }
 		                });
 		            }
-
 		        });
 		});
-
-
 	}
-
-}
+};
