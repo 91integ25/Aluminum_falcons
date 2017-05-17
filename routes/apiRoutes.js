@@ -165,7 +165,7 @@ module.exports = {
 		//   res.status(200).json({ 'message': 'Success'})
 		// });	
 	}
-	  monitoringCompany = "";
+	  monitoringCompany = " ";
 }
 module.exports = {
 
