@@ -26,7 +26,7 @@ function tweetsData(company, cb) {
     });
     var arr = [];
     stream.on("data", function(event) {
-        arr.push(event.text);      
+        arr.push(event.text);
           if (arr.length === 20){
             cb(arr);
         }
@@ -121,6 +121,7 @@ function resetMonitoring() {
 
 module.exports = {
         route: function(app) {
+
                     // POST route for creating a new user changed apiRouter to app
                     //TODO will app work without a var app
                 app.post("/user", function(req, res) {
@@ -144,16 +145,33 @@ module.exports = {
                     });
 
      			      });
+          //       	app.get("/user/logout", function(req, res, next) {
+					//   req.session.destroy();
+					//   res.redirect("/user");
+					// });
 
 
       		app.post("/api/create_stock",function(req,res){
-      		sentitwit(function(score){
-      						var stock = {
-      				company:req.body.company,
-      				sentiment:score
-      			}
-      			
-      				},req.body.company);
+      		// sentitwit(function(score){
+      		// 				var stock = {
+      		// 		company:req.body.company,
+      		// 		sentiment:score
+      		// 	}
+
+      		// 		},req.body.company);
+      		console.req
+      		db.Stock.create(req.body);
+      		db.Stock.findAll({
+      			where:{UserId:req.body.UserId},
+      			include:[db.User]
+      		}).then(function(dbStock){
+      			res.render("homepage",{
+              stock: dbStock,
+              username: req.body.username,
+              loggedIn: true
+            });
+      		})
+
       		});
 
 			app.post("/user/signin", function(req, res) {

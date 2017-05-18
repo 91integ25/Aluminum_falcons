@@ -72,8 +72,15 @@
             <div class="download-section">
                 <div class="container">
                     <div class="col-lg-8 col-lg-offset-2">
-                      <h1>current Sentiment{{this.score}}</h1>
-                      <h2>Stock Name {{this.company}}</h2>
+                      {{#each stocks}}
+                          <form action="/api/create_stock" method="post">
+                            <div class="input-group col-md-12 col-xs-12">
+                              <li class="form-control">
+                               <div class="col-md-7 col-xs-7">{{id}}. {{stock}}</div>
+                              </li>
+                            </div>
+                          </form>
+                      {{/each}}
                     </div>
                 </div>
             </div>
