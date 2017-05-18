@@ -118,13 +118,9 @@ function resetMonitoring() {
 		tempStream.destroy();
 	};
 }
-// POST route for creating a new user changed apiRouter to app
-        //TODO will app work without a var app
 
 module.exports = {
-
         route: function(app) {
-
 
                     // POST route for creating a new user changed apiRouter to app
                     //TODO will app work without a var app
@@ -178,10 +174,6 @@ module.exports = {
 
       		});
 
-
-
-
-
 			app.post("/user/signin", function(req, res) {
                     db.User.findOne({
                             username: req.body.username
@@ -202,7 +194,7 @@ module.exports = {
                                         var userToken = jwt.sign({
                                             //expires in one hour
                                             exp: Math.floor(Date.now() / 1000) + (60 * 60),
-											data: user.id
+											                      data: user.id
                                         }, 'randomsecretforsigningjwt');
                                         res.status(200).render("homepage",{
                                             id: user.id,
