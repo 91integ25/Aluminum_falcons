@@ -150,27 +150,26 @@ module.exports = {
 					//   res.redirect("/user");
 					// });
 
-
       		app.post("/api/create_stock",function(req,res){
-      		// sentitwit(function(score){
-      		// 				var stock = {
-      		// 		company:req.body.company,
-      		// 		sentiment:score
-      		// 	}
+          		// sentitwit(function(score){
+          		// 				var stock = {
+          		// 		company:req.body.company,
+          		// 		sentiment:score
+          		// 	}
 
-      		// 		},req.body.company);
-      		console.req
-      		db.Stock.create(req.body);
-      		db.Stock.findAll({
-      			where:{UserId:req.body.UserId},
-      			include:[db.User]
-      		}).then(function(dbStock){
-      			res.render("homepage",{
-              stock: dbStock,
-              username: req.body.username,
-              loggedIn: true
-            });
-      		})
+          		// 		},req.body.company);
+          		console.req
+          		db.Stock.create(req.body);
+          		db.Stock.findAll({
+          			where:{UserId:req.body.UserId},
+          			include:[db.User]
+          		}).then(function(dbStock){
+          			res.render("homepage",{
+                      stock: dbStock,
+                      username: req.body.username,
+                      loggedIn: true
+                    });
+          		})
 
       		});
 
