@@ -145,21 +145,13 @@ module.exports = {
                     });
 
      			      });
-          //       	app.get("/user/logout", function(req, res, next) {
+               	app.get("/user/logout", function(req, res, next) {
 					//   req.session.destroy();
 					//   res.redirect("/user");
 					// });
 
 
       		app.post("/api/create_stock",function(req,res){
-      		// sentitwit(function(score){
-      		// 				var stock = {
-      		// 		company:req.body.company,
-      		// 		sentiment:score
-      		// 	}
-
-      		// 		},req.body.company);
-      		console.req
       		db.Stock.create(req.body);
       		db.Stock.findAll({
       			where:{UserId:req.body.UserId},
@@ -173,6 +165,16 @@ module.exports = {
       		})
 
       		});
+
+
+      		app.delete("/delete_stock",function(req,res){
+      			db.Stock.destroy({where:{
+      				id:req.body.id
+      			}}).then(function(result){
+      				console.log(result);
+      			})
+      		})
+
 
 			app.post("/user/signin", function(req, res) {
                     db.User.findOne({
