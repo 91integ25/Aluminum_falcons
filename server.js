@@ -9,11 +9,11 @@ var apiRoutes = require("./routes/apiRoutes");
 var routes = require("./routes/htmlRoutes");
 var jwt = require('jsonwebtoken');
 var cookieParser = require('cookie-parser')
+var middleware = require('/routes/middleware')
 //new code 
 const gtGroupSecret = process.env.GT_GROUP_SECRET || 'ImTooLazyToWriteMyOwnSecretEnvValue';
 
 app.use(cookieParser(gtGroupSecret));
-
 app.use(express.static(process.cwd() + "/public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
@@ -54,7 +54,7 @@ app.use('/api/secure', function (req, res, next) {
 
 //Syncing our sequelize models and then starting our express app
 
-db.sequelize.sync({force:true}).then(function(){
+db.sequelize.sync({}).then(function(){
 	app.listen(PORT,function(){
 		console.log("listening on PORT: " + PORT)
 	});
