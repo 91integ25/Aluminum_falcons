@@ -145,34 +145,43 @@ module.exports = {
                     });
 
      			      });
-               	app.get("/user/logout", function(req, res, next) {
+               	//app.get("/user/logout", function(req, res, next) {
 					//   req.session.destroy();
 					//   res.redirect("/user");
 					// });
 
-
       		app.post("/api/create_stock",function(req,res){
-      		db.Stock.create(req.body);
-      		db.Stock.findAll({
-      			where:{UserId:req.body.UserId},
-      			include:[db.User]
-      		}).then(function(dbStock){
-      			res.render("homepage",{
-              stock: dbStock,
-              username: req.body.username,
-              loggedIn: true
-            });
-      		})
+
+          		// sentitwit(function(score){
+          		// 				var stock = {
+          		// 		company:req.body.company,
+
+          		// 		},req.body.company);
+          		console.log("this is /api/create_stock",req.body);
+          		db.Stock.create(req.body);
+          		db.Stock.findAll({
+          			where:{UserId:req.body.UserId},
+          			include:[db.User]
+          		}).then(function(dbStock){
+          			res.render("homepage",{
+                      stock: dbStock,
+                      username: req.body.username,
+                      loggedIn: true
+                    });
+          		})
+
 
       		});
 
 
-      		app.delete("/delete_stock",function(req,res){
-      			db.Stock.destroy({where:{
-      				id:req.body.id
-      			}}).then(function(result){
-      				console.log(result);
-      			})
+      		app.post("/api/delete_stock/:id",function(req,res){
+      			// console.log(req.body);d
+      			// b.Stock.destroy({where:{
+      			// 	id:req.params.id
+      			// }}).then(function(result){
+      			// res.redirect("/api/create_stock")
+      			// })
+      			res.send("this id deleted" + req.params.id)
       		})
 
 
@@ -213,5 +222,5 @@ module.exports = {
 
 
 }
-
 }
+
