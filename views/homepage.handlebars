@@ -126,8 +126,8 @@
                         <div class="form-group" >
                             <label for="kw">Company Name:</label>
                             <input type="hidden" name="loggedIn" value="true">
-                            <input type="hidden" name="username" value="{{this.username}}">
-                            <input type="hidden" name="UserId" value="{{this.id}}">
+                            <input type="hidden" name="username" value="{{user.username}}">
+                            <input type="hidden" name="UserId" value="{{user.id}}">
                             <input class="form-control" type="text" id="kw" name="company">
                         </div>
                         <button type="submit">Search</button>
@@ -150,6 +150,7 @@
 
                           </form>
                           <form action="/api/delete_stock/{{this.id}}?_method=DELETE" method="POST">
+                                <input type="hidden" name="id" value="{{this.UserId}}">
                                 <button type="submit" class="btn btn-default pull-right">Delete</button>
                           </form>
 

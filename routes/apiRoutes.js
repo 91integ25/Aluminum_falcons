@@ -149,20 +149,31 @@ module.exports = {
 					//   req.session.destroy();
 					//   res.redirect("/user");
 					// });
-
+					app.get("/stock_watch/:stock",function(req,res){
+						sentitwit(function(score){
+							console.log(score);
+							
+							res.send("success");
+						},req.params.stock)
+						
+					});
       		app.post("/api/create_stock",function(req,res){
-
-          		console.log("this is /api/create_stock",req.body);
+      			//console.log("this is Create: ",req.body)
           		db.Stock.create(req.body).then(function(result){
           		db.Stock.findAll({
           			where:{UserId:req.body.UserId},
           			include:[db.User]
           		}).then(function(dbStock){
+          			// console.log("this is user: " ,JSON.stringify(dbStock,null,2));
+          					console.log("this is user: ", dbStock[0].User.username);
+          		
           			res.render("homepage",{
                       stock: dbStock,
+                      user:dbStock[0],
                       username: req.body.username,
                       loggedIn: true
                     });
+                  
           		})
           		});
       		});
@@ -174,7 +185,7 @@ module.exports = {
       				id:req.params.id
       			}}).then(function(result){
             db.Stock.findAll({
-              where:{UserId:req.body.UserId},
+              where:{UserId:req.body.id},
               include:[db.User]
             }).then(function(dbStock){
       			res.render("homepage",{
@@ -188,39 +199,78 @@ module.exports = {
 
 
 			app.post("/user/signin", function(req, res) {
-                    db.User.findOne({
-                            username: req.body.username
-                        })
-                        .then(function(user) {
-                            if (!user) {
-                                console.log('no user found')
+				db.User.findOne({
+					username:req.body.username
+				}).then(function(user){
+									db.Stock.findAll({
+          			where:{UserId:user.id},
+          			include:[db.User]
+          		}).then(function(dbStock){
+          			if(!dbStock[0].User){
+          				 console.log('no user found')
                                 res.status(400).render("homepage",{
                                     'status': 'Invalid username or password'
                                 })
-                            } else {
-                                bcrypt.compare(req.body.password, user.password, function(err, valid) {
+                            }else{
+                            	bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
                                     if (err || !valid) {
                                         res.status(400).render("homepage",{
                                             'status': 'Invalid username or password'
                                         })
-                                    } else {
-                                        var userToken = jwt.sign({
+                                    }else{
+                                        	var userToken = jwt.sign({
                                             //expires in one hour
                                             exp: Math.floor(Date.now() / 1000) + (60 * 60),
 											                      data: user.id
-                                        }, 'randomsecretforsigningjwt');
-                                        res.status(200).render("homepage",{
-                                            id: user.id,
-                                            username: user.username,
-                                            loggedIn:true,
-                                            token: userToken
-                                        });
+                                        	}, 'randomsecretforsigningjwt');
+
+						                    res.render("homepage",{
+						                      stock: dbStock,
+						                      user:dbStock[0].User,
+						                      username: req.body.username,
+						                      loggedIn: true
+						                    });
                                     }
                                 });
                             }
+                    	});
+          		})
 
-                        });
-                });
+				})
+
+                //     db.User.findOne({
+                //             username: req.body.username
+                //         })
+                //         .then(function(user) {
+                //             if (!user) {
+                //                 console.log('no user found')
+                //                 res.status(400).render("homepage",{
+                //                     'status': 'Invalid username or password'
+                //                 })
+                //             } else {
+                //                 bcrypt.compare(req.body.password, user.password, function(err, valid) {
+                //                     if (err || !valid) {
+                //                         res.status(400).render("homepage",{
+                //                             'status': 'Invalid username or password'
+                //                         })
+                //                     } else {
+                //                         var userToken = jwt.sign({
+                //                             //expires in one hour
+                //                             exp: Math.floor(Date.now() / 1000) + (60 * 60),
+											     //                  data: user.id
+                //                         }, 'randomsecretforsigningjwt');
+                //                         res.status(200).render("homepage",{
+                //                             id: user.id,
+                //                             username: user.username,
+                //                             loggedIn:true,
+                //                             token: userToken
+                //                         });
+                //                     }
+                //                 });
+                //             }
+
+                //         });
+                // });
 
 
 }
