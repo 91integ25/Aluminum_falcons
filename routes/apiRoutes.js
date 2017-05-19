@@ -105,11 +105,7 @@ function beginMonitoring(cb,company) {
             return stream;
 };
 
-function sentitwit(cb, company) {
-beginMonitoring(function(score){
-	cb(score);
-},company)
-};
+
 
 function resetMonitoring() {
 	if (stream) {
@@ -149,13 +145,11 @@ module.exports = {
 					//   req.session.destroy();
 					//   res.redirect("/user");
 					// });
-					app.get("/stock_watch/:stock",function(req,res){
-						sentitwit(function(score){
-							console.log(score);
-							
-							res.send("success");
-						},req.params.stock)
-						
+					app.post("/get_stock",function(req,res){
+		          beginMonitoring(function(score){
+
+              },req.body.company);
+
 					});
       		app.post("/api/create_stock",function(req,res){
       			//console.log("this is Create: ",req.body)
@@ -166,14 +160,14 @@ module.exports = {
           		}).then(function(dbStock){
           			// console.log("this is user: " ,JSON.stringify(dbStock,null,2));
           					console.log("this is user: ", dbStock[0].User.username);
-          		
+
           			res.render("homepage",{
                       stock: dbStock,
-                      user:dbStock[0].User,
+                      user:dbStock[0],
                       username: req.body.username,
                       loggedIn: true
                     });
-                  
+
           		})
           		});
       		});
@@ -181,20 +175,18 @@ module.exports = {
 
       		app.delete("/api/delete_stock/:id",function(req,res){
       			console.log(req.body);
-      			db.Stock.destroy({
-      				where:{
+      			db.Stock.destroy({where:{
       				id:req.params.id
       			}}).then(function(result){
             db.Stock.findAll({
-              where:{UserId:req.body.Userid},
+              where:{UserId:req.body.id},
               include:[db.User]
             }).then(function(dbStock){
-
       			res.render("homepage",{
-                  stock: dbStock,
-                  user:dbStock[0].User,
-                  username: req.body.username,
-                  loggedIn: true
+              stock: dbStock,
+              user:dbStock[0],
+              username: req.body.username,
+              loggedIn: true
                 });
       			})
       		})
@@ -205,7 +197,7 @@ module.exports = {
 				db.User.findOne({
 					username:req.body.username
 				}).then(function(user){
-				db.Stock.findAll({
+									db.Stock.findAll({
           			where:{UserId:user.id},
           			include:[db.User]
           		}).then(function(dbStock){
@@ -237,9 +229,9 @@ module.exports = {
                                 });
                             }
                     	});
-          		});
+          		})
 
-			});
+				})
 
                 //     db.User.findOne({
                 //             username: req.body.username
