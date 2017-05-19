@@ -152,11 +152,6 @@ module.exports = {
 
       		app.post("/api/create_stock",function(req,res){
 
-          		// sentitwit(function(score){
-          		// 				var stock = {
-          		// 		company:req.body.company,
-
-          		// 		},req.body.company);
           		console.log("this is /api/create_stock",req.body);
           		db.Stock.create(req.body);
           		db.Stock.findAll({
