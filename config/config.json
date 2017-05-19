@@ -2,6 +2,7 @@
   "development": {
     "username": "root",
     "password": "91integ25@gmail.com",
+
     "database": "sentstock",
     "host": "127.0.0.1",
     "dialect": "mysql"

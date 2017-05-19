@@ -175,6 +175,7 @@ module.exports = {
                                 res.status(400).render("homepage",{
                                     'status': 'Invalid username or password'
                                 })
+
                             }else{
                             	var userToken = jwt.sign({
                                 //expires in one hour
