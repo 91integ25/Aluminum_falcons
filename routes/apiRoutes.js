@@ -153,7 +153,7 @@ module.exports = {
       		app.post("/api/create_stock",function(req,res){
 
           		console.log("this is /api/create_stock",req.body);
-          		db.Stock.create(req.body);
+          		db.Stock.create(req.body).then(function(result){
           		db.Stock.findAll({
           			where:{UserId:req.body.UserId},
           			include:[db.User]
@@ -164,6 +164,8 @@ module.exports = {
                       loggedIn: true
                     });
           		})
+
+          		});
 
 
       		});
