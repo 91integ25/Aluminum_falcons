@@ -117,7 +117,7 @@ module.exports = {
 		    	console.log(score);
 	        },req.body.company);
 	      
-	  });
+	  	});
 
   		app.post("/api/create_stock",function(req,res){
   			//console.log("this is Create: ",req.body)
