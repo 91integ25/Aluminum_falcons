@@ -169,7 +169,7 @@ module.exports = {
           		
           			res.render("homepage",{
                       stock: dbStock,
-                      user:dbStock[0],
+                      user:dbStock[0].User,
                       username: req.body.username,
                       loggedIn: true
                     });
@@ -181,15 +181,18 @@ module.exports = {
 
       		app.delete("/api/delete_stock/:id",function(req,res){
       			console.log(req.body);
-      			db.Stock.destroy({where:{
+      			db.Stock.destroy({
+      				where:{
       				id:req.params.id
       			}}).then(function(result){
             db.Stock.findAll({
-              where:{UserId:req.body.id},
+              where:{UserId:req.body.Userid},
               include:[db.User]
             }).then(function(dbStock){
+
       			res.render("homepage",{
                   stock: dbStock,
+                  user:dbStock[0].User,
                   username: req.body.username,
                   loggedIn: true
                 });
@@ -202,7 +205,7 @@ module.exports = {
 				db.User.findOne({
 					username:req.body.username
 				}).then(function(user){
-									db.Stock.findAll({
+				db.Stock.findAll({
           			where:{UserId:user.id},
           			include:[db.User]
           		}).then(function(dbStock){
@@ -234,9 +237,9 @@ module.exports = {
                                 });
                             }
                     	});
-          		})
+          		});
 
-				})
+			});
 
                 //     db.User.findOne({
                 //             username: req.body.username
