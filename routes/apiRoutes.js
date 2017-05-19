@@ -164,22 +164,27 @@ module.exports = {
                       loggedIn: true
                     });
           		})
-
           		});
-
-
       		});
 
 
-      		app.post("/api/delete_stock/:id",function(req,res){
-      			// console.log(req.body);d
-      			// b.Stock.destroy({where:{
-      			// 	id:req.params.id
-      			// }}).then(function(result){
-      			// res.redirect("/api/create_stock")
-      			// })
-      			res.send("this id deleted" + req.params.id)
+      		app.delete("/api/delete_stock/:id",function(req,res){
+      			console.log(req.body);
+      			db.Stock.destroy({where:{
+      				id:req.params.id
+      			}}).then(function(result){
+            db.Stock.findAll({
+              where:{UserId:req.body.UserId},
+              include:[db.User]
+            }).then(function(dbStock){
+      			res.render("homepage",{
+                  stock: dbStock,
+                  username: req.body.username,
+                  loggedIn: true
+                });
+      			})
       		})
+        });
 
 
 			app.post("/user/signin", function(req, res) {
@@ -220,4 +225,3 @@ module.exports = {
 
 }
 }
-

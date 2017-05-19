@@ -142,15 +142,17 @@
                     <div class="col-lg-8 col-lg-offset-2">
 
                       {{#each stock}}
-                          <div style="float: left; width: 200px;">
+
+                          <div class="stockOutput" style="float: left; width: 205px;">
                           <form action="/get_stock">
               			  		<input class="form-control" type="text" placeholder="{{id}}. {{company}}" readonly>
                                 <button type="submit" class="btn btn-default pull-left">Sentiment</button>
-                            
+
                           </form>
-                          <form action=/api/delete_stock/{{this.id}}?_method=DELETE method="POST">
+                          <form action="/api/delete_stock/{{this.id}}?_method=DELETE" method="POST">
                                 <button type="submit" class="btn btn-default pull-right">Delete</button>
                           </form>
+
                           </div>
               			  {{/each}}
 
@@ -188,5 +190,3 @@
         <p> &copy2017 Aluminum Falcons</p>
     </div>
 </footer>
-
-
