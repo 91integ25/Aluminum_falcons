@@ -17,73 +17,80 @@
                             <a href="#page-top"></a>
                         </li>
                         <li>
-                            <a class="page-scroll" href="#kword"></a>
+                            <a class="page-scroll" href="#kword">Company Search</a>
                         </li>
                         <li>
-                            <a class="page-scroll" href="#analytics"></a>
+                            <a class="page-scroll" href="#analytics">Analytics</a>
                         </li>
                         <li>
                             <a class="page-scroll" href="#contact">Contact</a>
                         </li>
 
-<!--------Log-in/Sign-Up Drop-down------>
+                        {{#if this.loggedIn}}
+                        <li>
+                        <a  class="page-scroll" href="#logged">Logged in as {{this.username}}</a>
+                        <li>
+                        {{/if}}
 
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Login</b> <span class="caret"></span></a>
-                            <ul id="login-dp" class="dropdown-menu">
-                                <li>
-                                   <div class="row">
-                                        <div class="col-md-12">
-                                            <form class="form" role="form" method="get" action="/log-in" accept-charset="UTF-8" id="login-nav">
-                                                <div class="form-group">
-                                                    <label class="sr-only" for="exampleInputEmail2">username</label>
-                                                    <input type="text" class="form-control" id="exampleInputEmail2" placeholder="username" required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="sr-only" for="exampleInputPassword2">Password</label>
-                                                    <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Password" required>
-                                                    <div class="help-block text-right"><a href="">Forget your password?</a></div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
-                                                </div>
-                                                <div class="checkbox">
-                                                    <label>
-                                                        <input type="checkbox"> Keep me logged-in
-                                                    </label>
-                                                </div>
-                                            </form>
-                                                                                
-                                          New here?
-                                        
-                                            <div class="Sign-Up">
-                                              <form class="form" role="form" method="post" action="/sign-up" accept-charset="UTF-8" id="join-nav">
-                                              <div class="form-group">
-                                                    <label class="sr-only" for="exampleInputEmail2">Username name</label>
-                                                    <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Input username" required name="userName">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="sr-only" for="exampleInputEmail2">Username email address</label>
-                                                    <input type="email" class="form-control" id="exampleInputEmail2" placeholder="Input Email" required name="email">
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="sr-only" for="exampleInputPassword2">Create Password</label>
-                                                    <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Create Password" required name="password">
-                                                  
-                                                </div>
-                                                <div class="form-group">
-                                                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
-                                                </div> 
-                                            </div>
-                                          
-                                        <div class="bottom text-center">
-                                            <a href="#"></a>
-                                        </div>
-                                    </div>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+<!--------Log-in/Sign-Up Drop-down------>
+{{#unless this.loggedIn}}
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Login</b> <span class="caret"></span></a>
+    <ul id="login-dp" class="dropdown-menu">
+        <li>
+           <div class="row">
+                <div class="col-md-12">
+                    <form class="form" role="form" method="POST" action="/user/signin" accept-charset="UTF-8" id="login-nav">
+                        <div class="form-group">
+                            <label class="sr-only" for="username">username</label>
+                            <input type="text" class="form-control" name="username" id="username" placeholder="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="password">Password</label>
+                            <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+                            <div class="help-block text-right"><a href="">Forgot your password?</a></div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                        </div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox"> Keep me logged-in
+                            </label>
+                        </div>
+                    </form>
+
+                  New here?
+
+                    <div class="Sign-Up">
+                      <form class="form" role="form" method="post" action="/user" accept-charset="UTF-8" id="join-nav">
+                      <div class="form-group">
+                            <label class="sr-only" for="exampleInputEmail2">Username name</label>
+                            <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Input username" required name="username">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="exampleInputEmail2">Username email address</label>
+                            <input type="email" class="form-control" id="exampleInputEmail2" placeholder="Input Email" required name="email">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="exampleInputPassword2">Create Password</label>
+                            <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Create Password" required name="password">
+
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                        </div>
+                    </div>
+
+                <div class="bottom text-center">
+                    <a href="#"></a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</li>
+{{/unless}}
+           </ul>
                 </div>
                 <!-- /.navbar-collapse -->
             </div>
@@ -95,20 +102,68 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-8 col-md-offset-2">
+                        {{#if this.status}}
+                            <h1>{{this.status}}
+                        {{/if}}
                             <h1 class="brand-heading">SentiTwit</h1>
                             <p>A STOCK TWITTERVERSE SENTIMENT ANALYTICS TOOL</p>
                             <p class="intro-text"></p>
-                           <!------- <a href="#kword" class="btn btn-circle page-scroll">---->
-                                <!------<i class="fa fa-angle-double-down animated"></i>---->
+                           <a href="#kword" class="btn btn-circle page-scroll">
+                                <i class="fa fa-angle-double-down animated"></i>
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
-       
-<!--------------------------Removed 2 divs- About Section or Company Search------and-------Download Section------->  
-       
+ {{#if loggedIn}}
+  <!-- About Section -->
+        <section id="kword" class="container content-section text-center">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2">
+                    <h2>Search</h2>
+                    <form class="create-form" action="/api/create_stock" method="post">
+                        <div class="form-group" >
+                            <label for="kw">Company Name:</label>
+                            <input type="hidden" name="loggedIn" value="true">
+                            <input type="hidden" name="username" value="{{user.username}}">
+                            <input type="hidden" name="UserId" value="{{user.id}}">
+                            <input class="form-control" type="text" id="kw" name="company">
+                        </div>
+                        <button type="submit">Search</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- Download Section -->
+        <section id="analytics" class="content-section text-center">
+            <div class="download-section">
+                <div class="container">
+                    <div class="col-lg-8 col-lg-offset-2">
+
+                      {{#each stock}}
+
+                          <div class="stockOutput" style="float: left; width: 205px;">
+                            <input class="form-control" name="company" type="text" placeholder="{{id}}. {{company}}" readonly>
+                          <form action="/get_stock" method="post">
+              			  		      <input type="hidden" name="company" value="{{company}}">
+                                <button type="submit" class="btn btn-default pull-left">Sentiment</button>
+
+                          </form>
+                          <form action="/api/delete_stock/{{this.id}}?_method=DELETE" method="POST">
+                                <input type="hidden" name="UserId" value="{{user.id}}">
+                                <button type="submit" class="btn btn-default pull-right">Delete</button>
+                          </form>
+
+                          </div>
+              			  {{/each}}
+
+                    </div>
+                </div>
+            </div>
+        </section>
+  {{/if}}
+
         <!-- Contact Section -->
         <section id="contact" class="container content-section text-center">
             <div class="row">
@@ -137,4 +192,3 @@
         <p> &copy2017 Aluminum Falcons</p>
     </div>
 </footer>
-

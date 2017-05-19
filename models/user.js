@@ -8,6 +8,10 @@ module.exports = function(sequelize, DataTypes) {
       },
       unique: true
     },
+    loggedIn:{
+    	type:DataTypes.BOOLEAN,
+    	defaultValue:false
+    },
     email: {
     	type: DataTypes.STRING,
     	allowNull: false
@@ -16,6 +20,16 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING,
       allowNull: false
     }
-  });
+  },{   classMethods: {
+        associate: function(models) {
+          // Associating Author with Posts
+          // When an Author is deleted, also delete any associated Posts
+          User.hasMany(models.Stock, {
+            onDelete: "cascade"
+          });
+        }
+      }
+    }
+);
   return User;
 };

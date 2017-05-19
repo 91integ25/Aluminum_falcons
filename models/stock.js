@@ -1,13 +1,6 @@
 module.exports = function(sequelize,DataTypes){
-	var Stock = sequelize.define('Stock', {
-	 stockName:{
-	 	type: DataTypes.INTEGER,
-	 	allowNull:false,
-	 	validate:{
-	 		len:[1]
-	 	}
-	 },
-	 ticker: {
+	var Stock = sequelize.define("Stock", {
+		company: {
 	 	type: DataTypes.STRING
 	 }
 	},{
@@ -23,4 +16,4 @@ module.exports = function(sequelize,DataTypes){
 	 	}
 	});
 	return Stock;
-}
+};

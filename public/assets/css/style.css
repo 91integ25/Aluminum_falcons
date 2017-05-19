@@ -246,6 +246,9 @@ a:focus {
   -o-background-size: cover;
 }
 
+.stockOutput {
+  padding: 5px 7px 5px 5px;
+}
 @media (min-width: 767px) {
   .content-section {
     padding-top: 250px;
