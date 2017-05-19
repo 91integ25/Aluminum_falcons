@@ -19,40 +19,6 @@ var client = new Twitter({
     access_token_secret: keys.access_secret
 });
 
-function tweetsData(company, cb) {
-    console.log(company);
-  		client.stream("statuses/filter", { track: company },function(inStream){
-    	stream = inStream;
-    });
-    var arr = [];
-    stream.on("data", function(event) {
-        arr.push(event.text);
-          if (arr.length === 20){
-            cb(arr);
-        }
-    });
-};
-
-function awsApi(cb, company) {
-    var apiResults = [];
-    tweetsData(company, function(tweetArr) {
-//JSLINT says unexpected for and unexpected var
-        for (var i = 0; i < tweetArr.length; i++) {
-            unirest.post("https://twinword-sentiment-analysis.p.mashape.com/analyze/")
-                .header("X-Mashape-Key", "BOEwktCNBDmshSUeLunnuyGLz48wp1yHuyljsnNDWN4oLTDPPG")
-                .header("Content-Type", "application/x-www-form-urlencoded")
-                .header("Accept", "application/json")
-                .send("text=" + tweetArr[i])
-                .end(function(result) {
-                    apiResults.push(result.body);
-
-                    if (apiResults.length === i) {
-                        cb(apiResults);
-                    }
-                });
-        }
-    });
-}
 
 function beginMonitoring(cb,company) {
     // cleanup if we're re-setting the monitoring
@@ -105,11 +71,7 @@ function beginMonitoring(cb,company) {
             return stream;
 };
 
-function sentitwit(cb, company) {
-beginMonitoring(function(score){
-	cb(score);
-},company)
-};
+
 
 function resetMonitoring() {
 	if (stream) {
@@ -120,99 +82,118 @@ function resetMonitoring() {
 }
 
 module.exports = {
-        route: function(app) {
 
-                    // POST route for creating a new user changed apiRouter to app
-                    //TODO will app work without a var app
-                app.post("/user", function(req, res) {
-                    bcrypt.hash(req.body.password, salt, function(err, hash) {
-                        // Store hash in your password DB.
-                        // TODO: update schema to enforce unique usernames
-                        db.User.create({
-                                username: req.body.username,
-                                email: req.body.email,
-                                password: hash
-                            })
-                            .then(function(dbPost) {
-                            	var status = {
-                            		status:"You have completed sign up log in to continue"
-                            	}
-                                res.status(200).render("homepage",status);
-                            })
-                            .catch(function(err) {
-                                res.status(500).send(err);
-                            })
-                    });
+    route: function(app) {
 
-     			      });
-          //       	app.get("/user/logout", function(req, res, next) {
-					//   req.session.destroy();
-					//   res.redirect("/user");
-					// });
+        // POST route for creating a new user changed apiRouter to app
+        //TODO will app work without a var app
+        app.post("/user", function(req, res) {
+            bcrypt.hash(req.body.password, salt, function(err, hash) {
+                // Store hash in your password DB.
+                // TODO: update schema to enforce unique usernames
+                db.User.create({
+                        username: req.body.username,
+                        email: req.body.email,
+                        password: hash
+                })
+                .then(function(dbPost) {
+                	var status = {
+                		status:"You have completed sign up log in to continue"
+                	}
+                    res.status(200).render("homepage",status);
+                })
+                .catch(function(err) {
+                    res.status(500).send(err);
+                })
+            });
 
-      		app.post("/api/create_stock",function(req,res){
-          		// sentitwit(function(score){
-          		// 				var stock = {
-          		// 		company:req.body.company,
-          		// 		sentiment:score
-          		// 	}
+		});
+       	//app.get("/user/logout", function(req, res, next) {
+		//   req.session.destroy();
+		//   res.redirect("/user");
+		// });
+		app.post("/get_stock",function(req,res){
+		    beginMonitoring(function(score){
+		    	console.log(score);
+	        },req.body.company);
+	      
+	  	});
 
-          		// 		},req.body.company);
-          		console.req
-          		db.Stock.create(req.body);
-          		db.Stock.findAll({
-          			where:{UserId:req.body.UserId},
-          			include:[db.User]
-          		}).then(function(dbStock){
-          			res.render("homepage",{
-                      stock: dbStock,
-                      username: req.body.username,
-                      loggedIn: true
-                    });
-          		})
-
+  		app.post("/api/create_stock",function(req,res){
+  			//console.log("this is Create: ",req.body)
+      		db.Stock.create(req.body).then(function(result){
+		  		db.Stock.findAll({
+		  			where:{UserId:req.body.UserId},
+		  			include:[db.User]
+		  		}).then(function(dbStock){
+		  			res.render("homepage",{
+		              stock: dbStock,
+		              user:dbStock[0].User,
+		              username: req.body.username,
+		              loggedIn: true
+		            });
+		          
+		  		})
       		});
-
-			app.post("/user/signin", function(req, res) {
-                    db.User.findOne({
-                            username: req.body.username
+  		});
+  		app.delete("/api/delete_stock/:id",function(req,res){
+	  			console.log(req.body);
+  			db.Stock.destroy({
+	  				where:{
+	  				id:req.params.id
+	  			}}).then(function(result){
+		        db.Stock.findAll({
+		          where:{UserId:req.body.UserId},
+		          include:[db.User]
+		        }).then(function(dbStock){
+		  			res.render("homepage",{
+		              stock: dbStock,
+		              user:dbStock[0].User,
+		              username: req.body.username,
+		              loggedIn: true
+		            });
+	  			})
+	  		})
+        });
+		app.post("/user/signin", function(req, res) {
+			db.User.findOne({
+				username:req.body.username
+			}).then(function(user){
+				db.Stock.findAll({
+	      			where:{UserId:user.id},
+	      			include:[db.User]
+	      		}).then(function(dbStock){
+	      			if(!dbStock[0].User){
+	      				 console.log('no user found')
+                        res.status(400).render("homepage",{
+                            'status': 'Invalid username or password'
                         })
-                        .then(function(user) {
-                            if (!user) {
-                                console.log('no user found')
+                    }else{
+                    	bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
+                            if (err || !valid) {
+
                                 res.status(400).render("homepage",{
                                     'status': 'Invalid username or password'
                                 })
-                            } else {
-                                bcrypt.compare(req.body.password, user.password, function(err, valid) {
-                                    if (err || !valid) {
-                                        res.status(400).render("homepage",{
-                                            'status': 'Invalid username or password'
-                                        })
-                                    } else {
-                                        var userToken = jwt.sign({
-                                            //expires in one hour
-                                            exp: Math.floor(Date.now() / 1000) + (60 * 60),
-											                      data: user.id
-                                        }, 'randomsecretforsigningjwt');
-                                        function storeCookie(user, userToken) {
-                                            //store the cookie
-                                        }
-                                        storeCookie();
-                                        res.status(200).render("homepage",{
-                                            id: user.id,
-                                            username: user.username,
-                                            loggedIn:true,
-                                            token: userToken
-                                        });
-                                    }
-                                });
+
+                            }else{
+                            	var userToken = jwt.sign({
+                                //expires in one hour
+                                exp: Math.floor(Date.now() / 1000) + (60 * 60),
+								                      data: user.id
+                            	}, 'randomsecretforsigningjwt');
+
+			                    res.render("homepage",{
+			                      stock: dbStock,
+			                      user:dbStock[0].User,
+			                      loggedIn: true
+			                    });
                             }
 
                         });
-                });
-
-
-}
-
+                    }
+            	});
+      		});
+		});
+	}
 }
