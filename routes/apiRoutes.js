@@ -145,15 +145,21 @@ module.exports = {
                     });
 
      			      });
-               	//app.get("/user/logout", function(req, res, next) {
+          //       	app.get("/user/logout", function(req, res, next) {
 					//   req.session.destroy();
 					//   res.redirect("/user");
 					// });
 
       		app.post("/api/create_stock",function(req,res){
+          		// sentitwit(function(score){
+          		// 				var stock = {
+          		// 		company:req.body.company,
+          		// 		sentiment:score
+          		// 	}
 
-          		console.log("this is /api/create_stock",req.body);
-          		db.Stock.create(req.body).then(function(result){
+          		// 		},req.body.company);
+          		console.req
+          		db.Stock.create(req.body);
           		db.Stock.findAll({
           			where:{UserId:req.body.UserId},
           			include:[db.User]
@@ -164,28 +170,8 @@ module.exports = {
                       loggedIn: true
                     });
           		})
-          		});
+
       		});
-
-
-      		app.delete("/api/delete_stock/:id",function(req,res){
-      			console.log(req.body);
-      			db.Stock.destroy({where:{
-      				id:req.params.id
-      			}}).then(function(result){
-            db.Stock.findAll({
-              where:{UserId:req.body.UserId},
-              include:[db.User]
-            }).then(function(dbStock){
-      			res.render("homepage",{
-                  stock: dbStock,
-                  username: req.body.username,
-                  loggedIn: true
-                });
-      			})
-      		})
-        });
-
 
 			app.post("/user/signin", function(req, res) {
                     db.User.findOne({
@@ -209,6 +195,10 @@ module.exports = {
                                             exp: Math.floor(Date.now() / 1000) + (60 * 60),
 											                      data: user.id
                                         }, 'randomsecretforsigningjwt');
+                                        function storeCookie(user, userToken) {
+                                            //store the cookie
+                                        }
+                                        storeCookie();
                                         res.status(200).render("homepage",{
                                             id: user.id,
                                             username: user.username,
@@ -224,4 +214,5 @@ module.exports = {
 
 
 }
+
 }
