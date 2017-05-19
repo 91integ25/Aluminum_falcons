@@ -145,20 +145,14 @@ module.exports = {
                     });
 
      			      });
-          //       	app.get("/user/logout", function(req, res, next) {
+               	//app.get("/user/logout", function(req, res, next) {
 					//   req.session.destroy();
 					//   res.redirect("/user");
 					// });
 
       		app.post("/api/create_stock",function(req,res){
-          		// sentitwit(function(score){
-          		// 				var stock = {
-          		// 		company:req.body.company,
-          		// 		sentiment:score
-          		// 	}
 
-          		// 		},req.body.company);
-          		console.req
+          		console.log("this is /api/create_stock",req.body);
           		db.Stock.create(req.body);
           		db.Stock.findAll({
           			where:{UserId:req.body.UserId},
@@ -171,7 +165,20 @@ module.exports = {
                     });
           		})
 
+
       		});
+
+
+      		app.post("/api/delete_stock/:id",function(req,res){
+      			// console.log(req.body);d
+      			// b.Stock.destroy({where:{
+      			// 	id:req.params.id
+      			// }}).then(function(result){
+      			// res.redirect("/api/create_stock")
+      			// })
+      			res.send("this id deleted" + req.params.id)
+      		})
+
 
 			app.post("/user/signin", function(req, res) {
                     db.User.findOne({
@@ -210,5 +217,5 @@ module.exports = {
 
 
 }
-
 }
+
