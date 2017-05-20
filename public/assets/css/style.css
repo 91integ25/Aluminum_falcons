@@ -80,6 +80,7 @@ a:focus {
   outline: none;
 }
 .navbar-custom a {
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
   color: white;
 }
 .navbar-custom .nav li a {
@@ -268,10 +269,11 @@ a:focus {
   border-radius: 0;
 }
 .btn-default {
+  font-family: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
   border: 1px solid #42DCA3;
   color: #42DCA3;
-  background-color: transparent;
-}
+  }
+
 .btn-default:hover,
 .btn-default:focus {
   border: 1px solid #42DCA3;
