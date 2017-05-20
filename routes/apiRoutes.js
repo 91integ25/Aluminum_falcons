@@ -155,42 +155,52 @@ module.exports = {
 	  			})
 	  		})
         });
-			app.post("/user/signin", function(req, res) {
-				db.User.findOne({
-					username:req.body.username
-				}).then(function(user){
-        				db.Stock.findAll({
-	      			    where:{UserId:user.id},
-	      			    include:[db.User]
+
+		app.post("/user/signin", function(req, res) {
+			db.User.findOne({
+				username:req.body.username
+			}).then(function(user){
+
+				db.Stock.findAll({
+	      			where:{UserId:user.id},
+	      			include:[db.User]
 	      		}).then(function(dbStock){
-	      			if(!dbStock[0].User){
-	      				 console.log('no user found')
-                        res.status(400).render("homepage",{
-                            'status': 'Invalid username or password'
-                        })
-                    }else{
-                    	bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
-                            if (err || !valid) {
+	      			console.log(dbStock)
+	      			if(!dbStock[0]){
+	      				res.render("homepage",{
+	      					user:user,
+	      					loggedIn:true
+	      				})
+	      			}else{
+		      			if(!dbStock[0].User){
+		      				 console.log('no user found')
+	                        res.status(400).render("homepage",{
+	                            'status': 'Invalid username or password'
+	                        })
+	                    }else{
+	                    	bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
+	                            if (err || !valid) {
 
-                                res.status(400).render("homepage",{
-                                    'status': 'Invalid username or password'
-                                })
-                            }else{
-                            	var userToken = jwt.sign({
-                                //expires in one hour
-                                exp: Math.floor(Date.now() / 1000) + (60 * 60),
-								                      data: user.id
-                            	}, 'randomsecretforsigningjwt');
+	                                res.status(400).render("homepage",{
+	                                    'status': 'Invalid username or password'
+	                                })
 
-			                    res.render("homepage",{
-			                      stock: dbStock,
-			                      user:dbStock[0].User,
-			                      loggedIn: true
-			                    });
-                            }
+	                            }else{
+	                            	var userToken = jwt.sign({
+	                                //expires in one hour
+	                                exp: Math.floor(Date.now() / 1000) + (60 * 60),
+									                      data: user.id
+	                            	}, 'randomsecretforsigningjwt');
 
-                        });
-                    }
+				                    res.render("homepage",{
+				                      stock: dbStock,
+				                      user:dbStock[0].User,
+				                      loggedIn: true
+				                    });
+	                            }
+
+	                        });
+	                }   }
             	});
       		});
 		});
