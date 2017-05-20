@@ -88,7 +88,6 @@ module.exports = {
 
 
     route: function(app) {
-
         // POST route for creating a new user changed apiRouter to app
         //TODO will app work without a var app
         app.post("/user", function(req, res) {
@@ -118,10 +117,21 @@ module.exports = {
 		// });
 		app.post("/get_stock",function(req,res){
 		    beginMonitoring(function(score){
-		    	console.log(score);
+		    	res.redirect(302,"/display_stock")
 	        },req.body.company);
 	      
 	  	});
+	  	app.get("/display_stock",function(req,res){
+	  		"<HEAD>" +
+                "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
+                req.headers.host +
+                "/\">\n" +
+                "<title>Twitter Sentiment Analysis</title>\n" +
+                "</HEAD>\n" +
+                "<BODY>\n" +
+                "<BODY>\n"
+	  		res.render()
+	  	})
 
   		app.post("/api/create_stock",function(req,res){
   			//console.log("this is Create: ",req.body)
@@ -179,18 +189,15 @@ module.exports = {
 	      				})
 	      			}else{
 		      			if(!dbStock[0].User){
-		      				 console.log('no user found')
 	                        res.status(400).render("homepage",{
 	                            'status': 'Invalid username or password'
 	                        })
 	                    }else{
 	                    	bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
 	                            if (err || !valid) {
-
 	                                res.status(400).render("homepage",{
 	                                    'status': 'Invalid username or password'
 	                                })
-
 	                            }else{
 	                            	var userToken = jwt.sign({
 	                                //expires in one hour
@@ -201,7 +208,8 @@ module.exports = {
 				                    res.render("homepage",{
 				                      stock: dbStock,
 				                      user:dbStock[0].User,
-				                      loggedIn: true
+				                      loggedIn: true,
+				                      userToken:userToken
 				                    });
 	                            }
 
