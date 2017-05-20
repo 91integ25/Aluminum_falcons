@@ -83,62 +83,6 @@ function resetMonitoring() {
 
 module.exports = {
 
-<<<<<<< HEAD
-                    // POST route for creating a new user changed apiRouter to app
-                    //TODO will app work without a var app
-                app.post("/user", function(req, res) {
-                    bcrypt.hash(req.body.password, salt, function(err, hash) {
-                        // Store hash in your password DB.
-                        // TODO: update schema to enforce unique usernames
-                        db.User.create({
-                                username: req.body.username,
-                                email: req.body.email,
-                                password: hash
-                            })
-                            .then(function(dbPost) {
-                            	var status = {
-                            		status:"You have completed sign up log in to continue"
-                            	}
-                                res.status(200).render("homepage",status);
-                            })
-                            .catch(function(err) {
-                                res.status(500).send(err);
-                            })
-                    });
-
-     			      });
-          //       	app.get("/user/logout", function(req, res, next) {
-					//   req.session.destroy();
-					//   res.redirect("/user");
-					// });
-					app.get("/stock_watch/:stock",function(req,res){
-						sentitwit(function(score){
-							console.log(score);
-							
-							res.send("success");
-						},req.params.stock)
-						
-					});
-      		app.post("/api/create_stock",function(req,res){
-      			//console.log("this is Create: ",req.body)
-          		db.Stock.create(req.body).then(function(result){
-          		db.Stock.findAll({
-          			where:{UserId:req.body.UserId},
-          			include:[db.User]
-          		}).then(function(dbStock){
-          			// console.log("this is user: " ,JSON.stringify(dbStock,null,2));
-          					console.log("this is user: ", dbStock[0].User.username);
-          		
-          			res.render("homepage",{
-                      stock: dbStock,
-                      user:dbStock[0].User,
-                      username: req.body.username,
-                      loggedIn: true
-                    });
-                  
-          		})
-          		});
-=======
     route: function(app) {
 
         // POST route for creating a new user changed apiRouter to app
@@ -190,8 +134,7 @@ module.exports = {
 		            });
 		          
 		  		})
->>>>>>> 8fc99052282e1bc0131b0a88b2c3c8634b9a55e6
-      		});
+      	});
   		});
   		app.delete("/api/delete_stock/:id",function(req,res){
 	  			console.log(req.body);
@@ -212,22 +155,13 @@ module.exports = {
 	  			})
 	  		})
         });
-<<<<<<< HEAD
-
-
 			app.post("/user/signin", function(req, res) {
 				db.User.findOne({
 					username:req.body.username
 				}).then(function(user){
-=======
-		app.post("/user/signin", function(req, res) {
-			db.User.findOne({
-				username:req.body.username
-			}).then(function(user){
->>>>>>> 8fc99052282e1bc0131b0a88b2c3c8634b9a55e6
-				db.Stock.findAll({
-	      			where:{UserId:user.id},
-	      			include:[db.User]
+        				db.Stock.findAll({
+	      			    where:{UserId:user.id},
+	      			    include:[db.User]
 	      		}).then(function(dbStock){
 	      			if(!dbStock[0].User){
 	      				 console.log('no user found')
@@ -241,31 +175,6 @@ module.exports = {
                                 res.status(400).render("homepage",{
                                     'status': 'Invalid username or password'
                                 })
-<<<<<<< HEAD
-                            }else{
-                            	bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
-                                    if (err || !valid) {
-                                        res.status(400).render("homepage",{
-                                            'status': 'Invalid username or password'
-                                        })
-                                    }else{
-                                        	var userToken = jwt.sign({
-                                            //expires in one hour
-                                            exp: Math.floor(Date.now() / 1000) + (60 * 60),
-											                      data: user.id
-
-                                        	}, 'randomsecretforsigningjwt');
-
-						                    res.render("homepage",{
-						                      stock: dbStock,
-						                      user:dbStock[0].User,
-						                      username: req.body.username,
-						                      loggedIn: true
-						                    });
-                                    }
-                                });
-=======
-
                             }else{
                             	var userToken = jwt.sign({
                                 //expires in one hour
@@ -278,7 +187,6 @@ module.exports = {
 			                      user:dbStock[0].User,
 			                      loggedIn: true
 			                    });
->>>>>>> 8fc99052282e1bc0131b0a88b2c3c8634b9a55e6
                             }
 
                         });
