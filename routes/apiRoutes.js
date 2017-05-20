@@ -134,7 +134,7 @@ module.exports = {
 		            });
 		          
 		  		})
-      		});
+      	});
   		});
   		app.delete("/api/delete_stock/:id",function(req,res){
 	  			console.log(req.body);
@@ -155,6 +155,7 @@ module.exports = {
 	  			})
 	  		})
         });
+
 		app.post("/user/signin", function(req, res) {
 			db.User.findOne({
 				username:req.body.username

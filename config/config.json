@@ -1,8 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "91integ25@gmail.com",
-
+    "password": "1107",
     "database": "sentstock",
     "host": "127.0.0.1",
     "dialect": "mysql"
