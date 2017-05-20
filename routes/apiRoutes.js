@@ -175,7 +175,7 @@ module.exports = {
 			db.User.findOne({
 				username:req.body.username
 			}).then(function(user){
-
+                console.log(req.body.username, "userinput")
 				db.Stock.findAll({
 	      			where:{UserId:user.id},
 	      			include:[db.User]
