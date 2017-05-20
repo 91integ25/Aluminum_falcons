@@ -28,6 +28,7 @@ function beginMonitoring(cb,company) {
     monitoringCompany = company;
     tweetCount = 0;
     tweetTotalSentiment = 0;
+
             client.stream("statuses/filter", {
                 "track": monitoringCompany
             }, function (inStream) {
@@ -78,10 +79,13 @@ function resetMonitoring() {
 		var tempStream = stream;
 	    stream = null;  // signal to event handlers to ignore end/destroy
 		tempStream.destroy();
+
 	};
+
 }
 
 module.exports = {
+
 
     route: function(app) {
 
@@ -134,6 +138,7 @@ module.exports = {
 		            });
 		          
 		  		})
+
       	});
   		});
   		app.delete("/api/delete_stock/:id",function(req,res){
@@ -165,6 +170,7 @@ module.exports = {
 	      			where:{UserId:user.id},
 	      			include:[db.User]
 	      		}).then(function(dbStock){
+
 	      			console.log(dbStock)
 	      			if(!dbStock[0]){
 	      				res.render("homepage",{
@@ -206,3 +212,4 @@ module.exports = {
 		});
 	}
 }
+
