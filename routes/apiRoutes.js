@@ -120,22 +120,12 @@ module.exports = {
 		app.get("/get_stock/:stock",function(req,res){
 			console.log(req.params.stock)
 		    beginMonitoring(function(score){
-	  		var monitoring = "<HEAD>" +
-            "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
-            req.headers.host +
-            "/\">\n" +
-            "<title>Twitter Sentiment Analysis</title>\n" +
-            "</HEAD>\n" +
-            "<BODY>\n" +
-            "<p>Score is :" + score +"<p>\n"
-            "</BODY>";
-	  		res.send(monitoring)
+		    	
+	  			
 	        },req.params.stock);
+	        res.send("success");
 	      
 	  	});
-	  	app.get("/display_stock",function(req,res){
-
-	  	})
 
   		app.post("/api/create_stock",function(req,res){
   			//console.log("this is Create: ",req.body)
