@@ -71,7 +71,9 @@ function beginMonitoring(cb,company) {
             return stream;
 };
 
+function callback(cb){
 
+}
 
 function resetMonitoring() {
 	if (stream) {
@@ -111,22 +113,24 @@ module.exports = {
 		//   req.session.destroy();
 		//   res.redirect("/user");
 		// });
-		app.post("/get_stock",function(req,res){
+		app.get("/get_stock/:stock",function(req,res){
+			console.log(req.params.stock)
 		    beginMonitoring(function(score){
-		    	res.redirect(302,"/display_stock")
-	        },req.body.company);
+	  		var monitoring = "<HEAD>" +
+            "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
+            req.headers.host +
+            "/\">\n" +
+            "<title>Twitter Sentiment Analysis</title>\n" +
+            "</HEAD>\n" +
+            "<BODY>\n" +
+            "<p>Score is :" + score +"<p>\n"
+            "</BODY>";
+	  		res.send(monitoring)
+	        },req.params.stock);
 	      
 	  	});
 	  	app.get("/display_stock",function(req,res){
-	  		"<HEAD>" +
-                "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
-                req.headers.host +
-                "/\">\n" +
-                "<title>Twitter Sentiment Analysis</title>\n" +
-                "</HEAD>\n" +
-                "<BODY>\n" +
-                "<BODY>\n"
-	  		res.render()
+
 	  	})
 
   		app.post("/api/create_stock",function(req,res){
