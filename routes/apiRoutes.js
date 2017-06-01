@@ -7,9 +7,7 @@ var bcrypt = require("bcrypt");
 var salt = "$2a$10$.zvkhL71NZo804bNdFdBae";
 var jwt = require("jsonwebtoken");
 var stream;
-var tweetCount;
-var monitoringCompany;
-var tweetTotalSentiment;
+
 var sentiment = require("sentiment");
 
 var client = new Twitter({
@@ -19,8 +17,22 @@ var client = new Twitter({
     access_token_secret: keys.access_secret
 });
 
+var tweetCount = 0;
+var tweetTotalSentiment = 0;
+var monitoringCompany;
 
-function beginMonitoring(cb,company) {
+function resetMonitoring() {
+	if (stream) {
+		var tempStream = stream;
+	    stream = null;  // signal to event handlers to ignore end/destroy
+		tempStream.destroy();
+
+	}
+  monitoringCompany = "";
+
+}
+
+function beginMonitoring(company) {
     // cleanup if we're re-setting the monitoring
     if (monitoringCompany) {
         resetMonitoring();
@@ -42,10 +54,9 @@ function beginMonitoring(cb,company) {
                         sentiment(data.text, function (err, result){
                             tweetCount++;
                             tweetTotalSentiment += result.score;
-                            var tweetAvg = tweetTotalSentiment/tweetCount;
-                            console.log("result.score", result.score)
-                            console.log("tweetAvg:", tweetAvg)
-                            cb(tweetTotalSentiment);
+                            // console.log("tweetCount: ", tweetCount);
+                            // console.log("tweetTotalSentiment: ",tweetTotalSentiment);
+
                         });
                     }
                 });
@@ -72,19 +83,23 @@ function beginMonitoring(cb,company) {
             return stream;
 };
 
-function callback(cb){
 
+function sentimentGauge() {
+    var avg = tweetTotalSentiment / tweetCount;
+    console.log("avg in SG: ", avg);
+    console.log("tweetTotalSentiment in SG: ", tweetTotalSentiment);
+    console.log("tweetCount in SG: ", tweetCount);
+    if (avg > 0.5) { // happy
+        return "Excited " + avg;
+    }
+    if (avg < -0.5) { // angry
+        return "Angry " + avg;
+    }
+    // neutral
+    return "Neutral " + avg;
 }
 
-function resetMonitoring() {
-	if (stream) {
-		var tempStream = stream;
-	    stream = null;  // signal to event handlers to ignore end/destroy
-		tempStream.destroy();
 
-	};
-
-}
 
 module.exports = {
 
@@ -117,15 +132,36 @@ module.exports = {
 		//   req.session.destroy();
 		//   res.redirect("/user");
 		// });
-		app.get("/get_stock/:stock",function(req,res){
-			console.log(req.params.stock)
-		    beginMonitoring(function(score){
-		    	
-	  			
-	        },req.params.stock);
-	        res.send("success");
-	      
+		app.get("/sentiment",function(req,res){
+
+        var monitoringResponse = "<HEAD>" +
+        "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
+        req.headers.host + "/sentiment" +
+        "/\">\n" +
+        "<title>New Twitter Sentiment Analysis</title>\n" +
+        "</HEAD>\n" +
+        "<BODY>\n" +
+        "<P>\n" +
+        "The Twittersphere is feeling<br>\n" +
+        " " + sentimentGauge() + "<br>\n" +
+        "about " + monitoringCompany + ".<br><br>" +
+        "Analyzed " + tweetCount + " tweets...<br>" +
+        "</P>\n" +
+        "<A href=\"/reset\">Monitor another phrase</A>\n" +
+        "</BODY>";
+        res.send(monitoringResponse);
+
 	  	});
+
+    app.get('/get_stock/:stock', function (req, res) {
+      beginMonitoring(req.params.stock);
+      res.redirect(302, '/sentiment');
+    });
+
+    app.get('/reset', function (req, res) {
+    resetMonitoring();
+    res.redirect(302, '/api/create_stock');
+    });
 
   		app.post("/api/create_stock",function(req,res){
   			//console.log("this is Create: ",req.body)
@@ -140,70 +176,80 @@ module.exports = {
 		              username: req.body.username,
 		              loggedIn: true
 		            });
-		          
+
 		  		})
 
       	});
   		});
-  		app.delete("/api/delete_stock/:id",function(req,res){
-	  			console.log(req.body);
-  			db.Stock.destroy({
-	  				where:{
-	  				id:req.params.id
-	  			}}).then(function(result){
-		        db.Stock.findAll({
-		          where:{UserId:req.body.UserId},
-		          include:[db.User]
-		        }).then(function(dbStock){
-		  			res.render("homepage",{
-		              stock: dbStock,
-		              user:dbStock[0].User,
-		              username: req.body.username,
-		              loggedIn: true
-		            });
-	  			})
-	  		})
-        });
+      app.delete("/api/delete_stock/:id",function(req,res){
+                db.Stock.destroy({
+                        where:{
+                        id:req.params.id
+                    }}).then(function(user){
+                          db.Stock.findAll({
+                            where:{UserId:req.body.UserId},
+                            include:[db.User]
+                          }).then(function(dbStock){
+                          if(!dbStock[0]){
+                            res.render("homepage",{
+                                user:user[0],
+                                loggedIn:true
+                            });
+                            }else{
+                                res.render("homepage",{
+                                stock: dbStock,
+                                user:dbStock[0].User,
+                                username: req.body.username,
+                                loggedIn: true
+                              });
+                            }
+                            });
 
-		app.post("/user/signin", function(req, res) {
-			db.User.findOne({
-				username:req.body.username
-			}).then(function(user){
+                })
+          });
 
-				db.Stock.findAll({
-	      			where:{UserId:user.id},
-	      			include:[db.User]
-	      		}).then(function(dbStock){
+        app.post("/user/signin", function(req, res) {
+                    console.log(req.body.username);
+                    db.User.findAll({
+                        where:{
+                        username:req.body.username
+                    }}).then(function(user){
 
-	      			console.log(dbStock)
-	      			if(!dbStock[0]){
-	      				res.render("homepage",{
-	      					user:user,
-	      					loggedIn:true
-	      				})
-	      			}else{
-		      			if(!dbStock[0].User){
-	                        res.status(400).render("homepage",{
-	                            'status': 'Invalid username or password'
-	                        })
-	                    }else{
-	                    	bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
-	                            if (err || !valid) {
-	                                res.status(400).render("homepage",{
-	                                    'status': 'Invalid username or password'
-	                                })
-	                            }else{
-	                            	var userToken = jwt.sign({
-	                                //expires in one hour
-	                                exp: Math.floor(Date.now() / 1000) + (60 * 60),
-									                      data: user.id
-	                            	}, 'randomsecretforsigningjwt');
+                        db.Stock.findAll({
+                              where:{UserId:user[0].id},
+                              include:[db.User]
+                          }).then(function(dbStock){
 
-				                    res.render("homepage",{
-				                      stock: dbStock,
-				                      user:dbStock[0].User,
-				                      loggedIn: true,
-				                      userToken:userToken
+                              console.log(user)
+                              if(!dbStock[0]){
+                                  res.render("homepage",{
+                                      user:user[0],
+                                      loggedIn:true
+                                  })
+                              }else{
+                                  if(!dbStock[0].User){
+                                    res.status(400).render("homepage",{
+                                        'status': 'Invalid username or password'
+                                    })
+                                }else{
+                                    bcrypt.compare(req.body.password, dbStock[0].User.password, function(err, valid) {
+                                        if (err || !valid) {
+                                            res.status(400).render("homepage",{
+                                                'status': 'Invalid username or password'
+                                            })
+                                        }else{
+                                            var userToken = jwt.sign({
+                                            //expires in one hour
+                                            exp: Math.floor(Date.now() / 1000) + (60 * 60),
+                                                                  data: user.id
+                                            }, 'randomsecretforsigningjwt');
+                                            console.log(dbStock[0].User);
+
+                                            res.render("homepage",{
+                                              stock: dbStock,
+                                              user:dbStock[0].User,
+                                              loggedIn: true,
+                                              userToken:userToken
 				                    });
 	                            }
 
@@ -214,4 +260,3 @@ module.exports = {
 		});
 	}
 }
-
