@@ -37,7 +37,8 @@ function beginMonitoring(company) {
     if (monitoringCompany) {
         resetMonitoring();
     }
-    monitoringCompany = company;
+    monitoringCompany = company.toUpperCase();
+    console.log(company);
     tweetCount = 0;
     tweetTotalSentiment = 0;
 
@@ -54,8 +55,8 @@ function beginMonitoring(company) {
                         sentiment(data.text, function (err, result){
                             tweetCount++;
                             tweetTotalSentiment += result.score;
-                            // console.log("tweetCount: ", tweetCount);
-                            // console.log("tweetTotalSentiment: ",tweetTotalSentiment);
+                            //console.log("tweetCount: ", tweetCount);
+                            //console.log("tweetTotalSentiment: ",tweetTotalSentiment);
 
                         });
                     }
@@ -86,17 +87,14 @@ function beginMonitoring(company) {
 
 function sentimentGauge() {
     var avg = tweetTotalSentiment / tweetCount;
-    console.log("avg in SG: ", avg);
-    console.log("tweetTotalSentiment in SG: ", tweetTotalSentiment);
-    console.log("tweetCount in SG: ", tweetCount);
     if (avg > 0.5) { // happy
-        return "Excited " + avg;
+        return "Excited, with an avg score of: " + avg;
     }
     if (avg < -0.5) { // angry
-        return "Angry " + avg;
+        return "Angry, with an avg score of: " + avg;
     }
     // neutral
-    return "Neutral " + avg;
+    return "Neutral, with an avg score of: " + avg;
 }
 
 
@@ -132,36 +130,68 @@ module.exports = {
 		//   req.session.destroy();
 		//   res.redirect("/user");
 		// });
-		app.get("/sentiment",function(req,res){
+		app.get("/sentiment/:stock",function(req,res){
+      db.Stock.findAll({
+        where:{UserId:req.body.UserId},
+        include:[db.User]
+      }).then(function(dbStock){
 
-        var monitoringResponse = "<HEAD>" +
-        "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
-        req.headers.host + "/sentiment" +
-        "/\">\n" +
-        "<title>New Twitter Sentiment Analysis</title>\n" +
-        "</HEAD>\n" +
-        "<BODY>\n" +
-        "<P>\n" +
-        "The Twittersphere is feeling<br>\n" +
-        " " + sentimentGauge() + "<br>\n" +
-        "about " + monitoringCompany + ".<br><br>" +
-        "Analyzed " + tweetCount + " tweets...<br>" +
-        "</P>\n" +
-        "<A href=\"/reset\">Monitor another phrase</A>\n" +
-        "</BODY>";
-        res.send(monitoringResponse);
+        res.render("sentiment",{
+              stock: dbStock,
+              company: req.params.stock,
+              tweetCount: tweetCount,
+              sentimentGauge: sentimentGauge(),
+              user:dbStock[0],
+              username: req.body.username,
+              loggedIn: true
+            });
+            // console.log(user);
+      })
+        // var monitoringResponse = "<HEAD>" +
+        // "<META http-equiv=\"refresh\" content=\"5; URL=http://" +
+        // req.headers.host + "/sentiment" +
+        // "/\">\n" +
+        // "<title>New Twitter Sentiment Analysis</title>\n" +
+        // "</HEAD>\n" +
+        // "<BODY>\n" +
+        // "<P>\n" +
+        // "Please allow for sentiment to be gathered. The Twittersphere is feeling<br>\n" +
+        // " " + sentimentGauge() + "<br>\n" +
+        // "about " + monitoringCompany + ".<br><br>" + "For an accurate depiction of sentiment, please wait for a larger sample size of tweets.<br>" +
+        // "Analyzed " + tweetCount + " tweets...<br>" +
+        // "</P>\n" +
+        // // "<A href=\"/reset\">Monitor another phrase</A>\n" +
+        // "<form action=\"/reset\" method=\"post\">" +
+        // "<input type=\"hidden\" name=\"UserId\" value=\"{{this.User.id}}\">" +
+        // "<button type=\"submit\">Return</button>" + "</form>" +
+        // "</BODY>";
+        // res.send(monitoringResponse);
 
 	  	});
 
     app.get('/get_stock/:stock', function (req, res) {
       beginMonitoring(req.params.stock);
-      res.redirect(302, '/sentiment');
+      res.redirect("/sentiment/"+req.params.stock);
+
     });
 
-    app.get('/reset', function (req, res) {
-    resetMonitoring();
-    res.redirect(302, '/api/create_stock');
-    });
+  //   app.post('/reset', function (req, res) {
+  //   resetMonitoring();
+  //     console.log(req.body.UserId);
+  //     console.log(db.User);
+  //   db.Stock.findAll({
+  //     where:{UserId:req.body.UserId},
+  //     include:[db.User]
+  //   }).then(function(dbStock){
+  //     res.render("homepage",{
+  //
+  //           stock: dbStock,
+  //           user:dbStock[0].User,
+  //           username: req.body.username,
+  //           loggedIn: true
+  //         });
+  //   });
+  // });
 
   		app.post("/api/create_stock",function(req,res){
   			//console.log("this is Create: ",req.body)

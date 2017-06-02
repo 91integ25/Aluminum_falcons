@@ -1,14 +1,123 @@
- {{#if loggedIn}}
+<HEAD><META http-equiv="refresh" content="5; URL=http://localhost:8080/sentiment/{{company}}">
+<title>New Twitter Sentiment Analysis</title>
+</HEAD>
+<!-- Navigation -->
+<nav class="navbar navbar-custom navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse">
+            Menu <i class="fa fa-bars"></i>
+            </button>
+            <a class="navbar-brand page-scroll" href="#page-top">
+                <i class="fa fa-play-circle"></i> <span class="light">Start</span> SentiTwit
+            </a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
+            <ul class="nav navbar-nav">
+                <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+                <li class="hidden">
+                    <a href="#page-top"></a>
+                </li>
+                <li>
+                    <a class="page-scroll" href="#kword">Company Search</a>
+                </li>
+                <li>
+                    <a class="page-scroll" href="#analytics">Analytics</a>
+                </li>
+                <li>
+                    <a class="page-scroll" href="#contact">Contact</a>
+                </li>
+
+                {{#if loggedIn}}
+                <li>
+                <a  class="page-scroll" href="#logged">Logged in as {{user.username}}</a>
+                <li>
+                {{/if}}
+
+<!--------Log-in/Sign-Up Drop-down------>
+{{#unless loggedIn}}
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown"><b>Login</b> <span class="caret"></span></a>
+<ul id="login-dp" class="dropdown-menu">
+<li>
+   <div class="row">
+        <div class="col-md-12">
+            <form class="form" role="form" method="POST" action="/user/signin" accept-charset="UTF-8" id="login-nav">
+                <div class="form-group">
+                    <label class="sr-only" for="username">username</label>
+                    <input type="text" class="form-control" name="username" id="username" placeholder="username" required>
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="password">Password</label>
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+                    <div class="help-block text-right"><a href="">Forgot your password?</a></div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox"> Keep me logged-in
+                    </label>
+                </div>
+            </form>
+
+          New here?
+
+            <div class="Sign-Up">
+              <form class="form" role="form" method="post" action="/user" accept-charset="UTF-8" id="join-nav">
+              <div class="form-group">
+                    <label class="sr-only" for="exampleInputEmail2">Username name</label>
+                    <input type="text" class="form-control" id="exampleInputEmail2" placeholder="Input username" required name="username">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="exampleInputEmail2">Username email address</label>
+                    <input type="email" class="form-control" id="exampleInputEmail2" placeholder="Input Email" required name="email">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="exampleInputPassword2">Create Password</label>
+                    <input type="password" class="form-control" id="exampleInputPassword2" placeholder="Create Password" required name="password">
+
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+                </div>
+            </div>
+
+        <div class="bottom text-center">
+            <a href="#"></a>
+        </div>
+    </div>
+</li>
+</ul>
+</li>
+{{/unless}}
+   </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
     <header class="intro">
     <div class="intro-body">
         <div class="container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
-                  scoring page
-                  {{score}}
+                  <P> Please allow for sentiment to be gathered. The Twittersphere is feeling<br>
+                     {{sentimentGauge}}<br>
+                      about {{company}}.<br><br>For an accurate depiction of sentiment, please wait for a larger sample size of tweets.<br>Analyzed {{tweetCount}} tweets...<br></P>
+                  <form class="create-form" action="/reset" method="post">
+                      <div class="form-group" >
+                          <label for="kw">Sentiment:</label>
+                          <input type="hidden" name="loggedIn" value="true">
+                          <input type="hidden" name="username" value="{{user.username}}">
+                          <input type="hidden" name="UserId" value="{{user.id}}">
+                      </div>
+                      <button type="submit">Return</button>
+                  </form>
                 </div>
             </div>
         </div>
     </div>
   </header>
-{{/if}}
